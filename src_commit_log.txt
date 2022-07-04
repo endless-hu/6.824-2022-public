@@ -1,0 +1,522 @@
+commit 2c6553093dfd8c69e537caf2d98b290979545635
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 4 14:13:48 2022 +0800
+
+    Finished lab2.md
+
+commit 022a99b9c99be8e2d29764b064ed458ce5689bb9
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 4 14:02:51 2022 +0800
+
+    Bug Fix:
+    I made the exit and change of state atomic
+     to avoid AppendEntries assertion failure
+
+commit 8a562637605927daefb134bf3b651ec12e2afd5a
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 4 11:43:31 2022 +0800
+
+    Remove the assertion. It's not necessary
+
+commit af0771ade7e460e33762e7c1aa9b826062609954
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 4 10:32:30 2022 +0800
+
+    Fix the previous commit
+      that a leader does not immediately send heartbeats upon election
+
+commit f5e5a70c8b284954fd5510259d292b2cace01bb2
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 4 09:04:20 2022 +0800
+
+    Finished some parts of report
+    Add test logs
+    Add `calc_log.py` to process the log and form a markdown table
+    Improvement to leader() thread. Now the thread will exit immediately
+      once exitCh signals.
+
+commit 825a9a074072ef7490a167a25cfeb1705d8aa7e2
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 3 19:02:39 2022 +0800
+
+    Add docs to myBugs.md
+
+commit f7b015c9378feb43cccf88bdd4bbf23b7bf002ff
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 3 20:43:42 2022 +0800
+
+    Optimize the logic of election and heartbeat
+    Add strong checks against split brain.
+    Change the code to prevent split brain in election and heartbeat
+
+commit c18166e66c8752242aebb88c52473eebd770f645
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 3 15:55:49 2022 +0800
+
+    Amend the previous commit:
+    Add another layer of check in Start()
+    Otherwise leaders for old term can append logs in new term
+
+commit adb9f1065f07c5d0801e80fc89ff2c72a6e18284
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 3 10:11:21 2022 +0800
+
+    Bug Fix:
+    Be careful about resetting leaderID!
+    If it's reset, the leader() thread will exit.
+    The problem is that the vestigal leader thread detected network partition,
+    thus resetting leaderID will cause the current leader thread to exit.
+    This bug is not fatal, but it CAN disturb the normal operations,
+    and even cause some tests timeout
+
+commit cea4c3c090fdca7772c51dee54e12e39751b9ef9
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 2 13:39:45 2022 +0800
+
+    Bug fix(2D):
+    After taking or installing a snapshot,
+    I should update the `nextLogIndex`
+
+commit a89622513bed67be8e0f5da0c9d0eae23b186d89
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 2 10:30:44 2022 +0800
+
+    Update test-many.sh
+
+commit a05e5588cd54c48105b2efb475d0728d209ca08b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 2 08:02:35 2022 +0800
+
+    Fix the bug:
+    If all logs are empty leader log,
+    then I should adjust the nextLogIndex to 1.
+    Otherwise, there may be inconsistencies
+
+commit 3fb84d35f216cc0f3ec506edcd572381a8defd8c
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 1 19:45:38 2022 +0800
+
+    Relaxing the timeout parameter in testing script.
+    Because the whole test takes at least 6 minutes
+
+commit eb565e59ebd4799403164b8580c5e6a9ea404c4a
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 1 19:38:24 2022 +0800
+
+    Pass ALL TESTS in Raft for once
+    Need further rigourous test
+    ---
+    One bug fix:
+    When a raft reads back persistent data,
+    it should also set lastApplied to rf.snapshotIndex
+      so that applier() thread will NOT apply logs that
+      were already applied
+
+commit 7ba6fe56fcba12eead0800bd770515b3794f49cd
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 1 19:21:42 2022 +0800
+
+    Implement the InstallSnapshot RPC:
+    1. Plug the call of InstallSnapshot into heartBeat()
+    2. Integrate it with my indexing schema designed for upper service
+    3. Refactored Encoding code
+    ---
+    Besides, I fixed some minor bugs:
+    line 907: When a leader falls back to follower, it should reset voteFor
+    line 552: Leader should initialize the matchIndex to -1
+      because there's no match
+
+commit b41776f157fca7d0579626019479158f71a10023
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 1 14:17:45 2022 +0800
+
+    Pass BasicSnapshot
+    1. Add snapshotIndex to Raft so that it knows where the log begins.
+    2. Modify the persist() and ReadPersist() to persist the snapshotIndex.
+    3. Add dummy InstallSnapshot() RPCs and necessary structs.
+    4. Implement Snapshot() to trim logs before index and persist snapshot.
+    5. Change the other code to fit the snapshotIndex
+
+commit 0ee255ce142a60637760a1848e6f37ce6cb1e774
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 1 09:02:54 2022 +0800
+
+    Optimize the election procedure
+    I fix every round's time to 1 second.
+    The peer will start voting
+    at a random point in the 100~600ms in each round.
+    This helps reduce the likilihood that an outdated peer interferes
+    the voting process
+    by easily increase its term number.
+
+commit 4fc57902c1ca1343aa78e3ba672cad36c0e4b474
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jun 29 12:11:13 2022 +0800
+
+    Bug Fix:
+    Change the election back into single thread
+    Because even in single thread,
+    one round election only costs AT MOST 1 second,
+    and it's much easier to ensure correctness;
+    However, running each round of election in different thread
+    will cause much headache about coordination
+
+commit ac64ab2366ccc4d5ebbfad11f08f5811a9ac8f2b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jun 29 09:52:21 2022 +0800
+
+    Bug fix:
+    Reset election timer upon elected to stop sleeping elect() thread
+
+commit 17a3e4106c7c1c37ddf1e32332551539d502034c
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 18:24:17 2022 +0800
+
+    Speed up election
+    Test 2A fails after 186 rounds, so I have to find some methods to
+    reduce the waiting time when start election
+
+commit 2a81457c587eedf16f65dc7a44a7f45f7d5e8605
+Merge: 3368bb4 d94ea16
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 16:45:01 2022 +0800
+
+    Merge remote-tracking branch 'source/master'
+
+commit 3368bb445766f15973afc67b2641a53b01a1cdf0
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 15:00:22 2022 +0800
+
+    Make the test script more information-rich.
+    Ready for rigorous tests
+
+commit 2e0a3b2b384217858db58baeb58a640ecb4c4145
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 14:41:24 2022 +0800
+
+    Remove the election restriction on commitIndex
+    It's unnecessary and it will make test 2A fail
+    ----
+    Change the leader election command to nil,
+      which is more appropriate than -1.
+
+commit 9e0816228b9306ec330146b844224f8a580db562
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 12:33:40 2022 +0800
+
+    Reset the election waiting time to  [200, 500]
+    Because sometimes election test(2A) will fail
+    -----
+    Update test-many.sh to support -race option
+
+commit 0e0865644ecfc0d297189d07be52d36d3003c4a9
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 12:17:09 2022 +0800
+
+    Seperate the leader commands and outside commands
+    And Fix a race condition
+    ---------
+    In the previous version, the leader will append a new log upon election,
+      which will cause the upper service to read undesirable
+      Raft commands.
+      To avoid this, I introduced the logIndex to make commands received
+      from the Start() command serial.
+      When applying logs, leader command will be ignored.
+      Thanks to the logIndex,
+      the applied logs are consistent to the outside world,
+      as if there's no leader commands.
+    ----
+    @kickOffElection():
+    I removed the local variable `mu` and use rf.mu for concurrency control.
+      And before send signal to `beLeader` channel, rf.mu should be released
+      to prevent dead lock.
+      Because the signal may never be read.
+
+commit 56fedd1e7f858effc25148f5697a4196db536da5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 28 10:35:30 2022 +0800
+
+    Bug fix:
+    Leader should append a command to the log upon election.
+    See "Bug 4" in `myBugs.md`
+
+commit fb7fae2cce9599998003fdd900c261fd7a803b1a
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 21:35:52 2022 +0800
+
+    Add timing feature to bash script
+
+commit 1644844ad2f2b22e6ed1eb8778e478764f15f3ff
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 21:28:35 2022 +0800
+
+    Bug fix
+    @AppendEntries()
+    Adjust the order of checking args.Term and check args.CommitIndex
+    Because a raft peer ALWAYS have to check for incoming RPC's term number
+      and update term number before doing anything else
+
+commit b3e6750af4c9f09ed118daed0b52e9a0d618f9cf
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 18:51:50 2022 +0800
+
+    Impose a more strict election restriction.
+    The peer will check the candidate's commit as well as currentTerm
+    Because commitIndex reflects where the majority has replicated the log
+      and I want to ensure that all logs before commitIndex will eventually
+      be applied on every peer.
+      Therefore. we cannot let some odd peers with fewer commits
+      overtake the leader when the network fails
+      and rewrite some committed logs.
+
+commit 17532a6cee8791fe61106a41f99fb34dcbfaa683
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 18:10:26 2022 +0800
+
+    Relax the timeout in the test script from 1m30s to 5m.
+    Because a complete run of 2C's tests take about 150s
+    on my relatively new laptop (i5-11300H, 16G RAM)
+
+commit e2499653f485c378688cfa223b77624255817c84
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 18:00:48 2022 +0800
+
+    The commitIndex should be persisted
+    Because it records where the consensus are for the whole system.
+    Optimize the nextIndex backup algorithm:
+      The follower will report to the leader its commitIndex,
+      so that the leader will send all logs after the commitIndex
+      in one heartbeat
+
+commit a01a7716a11e6ce04c185fe5dbe6d35054751f02
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 17:23:04 2022 +0800
+
+    Lab 3C complete && Update test-many.sh
+    --------------
+    In raft.go:
+    1. Remove the code to back up the commitIndex because it's not necessary
+    2. Use LastLogIndex and LastLogTerm instead of commitIndex
+    3. Optimize the AppendEntries. When a follower refuses the AppendEntries
+      because of inconsistent log, the leader will resend the whole log
+      and let the follower update itself
+    4. Fix a bug in election. Before the candidate gathered enough votes,
+      it may already receive a newer round of election by others.
+      In this case, the candidate should exit immediately.
+    -------------
+    For test-many.sh:
+    Because part 2C involves restarting peers, to make the log consistent,
+      the raft peer will not delete the old logs,
+      so I have to manually delete them in this script.
+
+commit 0c28534094d64b094794d927695aac98b783f13b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 12:20:26 2022 +0800
+
+    Fix more bugs. See the report in doc/myBug.md
+
+commit d0bbb29a62926b80dbdeb2c5e06ae7f7b63ad800
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 10:53:21 2022 +0800
+
+    Partially passed tests in 2C
+    Add illustrations on the problematic scenario
+
+commit 6a5de1c2fb99a4f29333797aafc5a197ac406ccc
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 27 10:44:02 2022 +0800
+
+    Add doc to illustrate the previous bug in 2B
+
+commit 11e22cc0eb78748873e31b39630e7b252f6718b4
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jun 26 14:18:34 2022 +0800
+
+    Amendment to 2B. Primarliy pass all tests
+    line 185: The candidate should send its latest commit index
+      instead of the last log index.
+      A follower should vote for candidates who have the most updated
+      AND committed logs, instead of candidates who
+      has many uncommitted logs
+    @RequestVote:
+    1.Only update the time stamp when I grant the vote
+      to prevent election race.
+    2. Check for COMMITTED logs instead of the last log
+    @ticker():
+    Refactored some code
+    @kickOffElection():
+    The args should contain the COMMIT INDEX
+    
+    Other trivial chages,
+      like deleting unnecessary code and making logger prettier
+
+commit 100b478d952b7d2c4cf15c2e14b031254003c64c
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jun 26 11:18:41 2022 +0800
+
+    Improve the logging code in raft
+    The voting procedure doesn't impose a valid restriction. Going to fix it
+    Also, I should append an empty log when a follower becomes candidate
+
+commit 2c524811829f73b4d8bc4eea831dfc42c3582c2d
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jun 25 20:52:22 2022 +0800
+
+    Update raft.go
+    ran TestFailAgree2B for 100 times without failure
+    line 324: The Start() should return immediately,
+      instead of waiting for commit
+    line 395: When start election, the peer should reset the leaderID,
+      so that it will NOT refuse new leader's heartbeat
+    line 617: Add bound check for args.Entries[0]
+    line 661: When exit leader thread, we should reset election timer
+      to prevent immediate re-election
+    line 671: Remove WaitGroup so that
+      the leader can update its commitIndex timely.
+      We cannot wait until all RPCs return
+    --------
+    Update the test script to test without -race
+    Because race detector will fail the test
+    when cfg is cleaning up the environment
+         while raft is logging
+
+commit 40ae43d78ca0924c3da6bcc930a048d9f82150d1
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jun 25 15:33:10 2022 +0800
+
+    Passed 3 tests in 2B
+
+commit 6afb0c317f2c9e1369612c89e151dfc5a1feca74
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jun 25 11:19:40 2022 +0800
+
+    Implement 2B on leader side
+    Fill in rf.Start so that it will return until the command is committed
+    Some change to code so that it's more clear
+
+commit 36eb3e389ef6d1113e80a30fc26cd05227145f14
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jun 22 21:48:53 2022 +0800
+
+    Add report for lab 2A.
+    update lab1.md
+
+commit ef96be309a4bd778535b8a5fa986dbf823faf11b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 7 16:21:28 2022 +0800
+
+    Lab 2A solidly completed
+    Each test is executed for 500 times WITHOUT FAILURE
+    Add a test script for convenience
+
+commit b77f1f3a2924d3df3ceb17f8ae470924a591acf3
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 7 15:54:38 2022 +0800
+
+    Fix the bug that
+    Leader did not stop sending heartbeat when heartbeat got rejected
+
+commit 3499829938a411ec7caebc1abaf03ac0e3c0b9db
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jun 7 12:38:42 2022 +0800
+
+    Fix the following bugs:
+    Leader may not send heartbeat in 100ms
+    Because it may got blocked by RPC for several seconds.
+    
+    I use select and goroutine to make sending and receiving async
+    
+    The third test sometimes fail, need further inspection
+
+commit a8cdc4f1f539ff8ecc954e504a6efbe5e4100fc6
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jun 6 19:25:16 2022 +0800
+
+    Lab 2A completed.
+    Passed all tests.
+    But need to repeat for many times to ensure correctness
+
+commit 16f44e5b57cfc003f1bd84bc6780f140c448ebbc
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue May 31 13:48:50 2022 +0800
+
+    Add report for lab1
+
+commit 00bdf19903c2d228e6db2b713d684549e7e99059
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon May 30 16:08:06 2022 +0800
+
+    Improve the algorithm of distributing tasks
+    Now it consumes less time, compared to previous O(N2) time complexity
+
+commit 15de7372493b0cd28c785958e568ddeb8284a57f
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon May 16 17:51:52 2022 +0800
+
+    Enhanced crash test, truly random exit
+    Fix a bug in coordinator. Workers should obtain total file counts
+
+commit 906e57d9cb55bcf666a44ab048d5d0b2fdc6cc30
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon May 16 16:31:00 2022 +0800
+
+    Stateless solution. Much lighter
+    Passed all tests without tweak timeout
+
+commit 6e718379e8622f3841549dea35ba98f8ad491b83
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri May 6 17:12:48 2022 +0800
+
+    Lab 1 sketch set up
+    1. Added necessary RPC definitions;
+    2. Implemented Worker() process;
+    3. Partial remote function stubs on coordinator side
+    4. Have NOT considered concurrency control
+
+commit d94ea1678082307cb5bb6a36f6cd8eb0c117614a
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Wed Mar 2 04:48:31 2022 -0500
+
+    update
+
+commit 732981285f408f796402d4ca18d70600c37adba0
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Mon Feb 28 13:35:32 2022 -0500
+
+    update
+
+commit a997782d1d83d27b80f62aeb79f71e8f18b6461e
+Author: Cel A. Skeggs <cela@mit.edu>
+Date:   Tue Feb 1 17:47:03 2022 -0500
+
+    update
+
+commit 46ec1a324ff24e10012eecaaaf4f63fb5dc5ca2c
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Mon Jan 24 05:05:16 2022 -0500
+
+    update
+
+commit ad9f26ced062a35309594d365968ee20100a5b50
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Sat Jan 15 06:07:17 2022 -0500
+
+    update
+
+commit b0a87bd25d072695efe5c51ee445ecea8c70dd19
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Sat Jan 15 06:03:55 2022 -0500
+
+    update
+
+commit b00e438c35e0ee8fb2442cb430b55c93dea2de13
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Tue Jan 11 10:56:27 2022 -0500
+
+    update
+
+commit 5af9fddd54945ffee2e634244413336107e17c97
+Author: Robert Morris <rtm@csail.mit.edu>
+Date:   Mon Jan 10 15:19:31 2022 -0500
+
+    update
