@@ -2,6 +2,8 @@
 
 This is **my project report** for [MIT's 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
 
+**PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a public version of my project. I don't open my source code because it is a course project and I believe I'm obliged to help protect academic integrity.
+
 # ENVIRONMENT SETUP
 
 The whole lab is developed under `Go`, so you should [set up the `Go` environment](http://nil.lcs.mit.edu/6.824/2022/labs/go.html) before testing my code. 
