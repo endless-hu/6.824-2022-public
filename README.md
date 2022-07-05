@@ -1,5 +1,8 @@
 # FOREWORD
 
+[![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)
+[![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)
+
 This is **my project report** for [MIT's 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
 
 **PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a public version of my project. I don't open my source code because it is a course project and I believe I'm obliged to help protect academic integrity.
