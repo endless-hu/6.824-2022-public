@@ -30,12 +30,12 @@ do
     # run with `-race` option
     if ! go test -run $1 $3 -timeout 15m; 
     then
-      echo Some tests fail! && exit
+      echo Some tests fail! && exit 1
     fi
   else
     if ! go test -run $1 -timeout 15m; 
     then
-      echo Some tests fail! && exit
+      echo Some tests fail! && exit 1
     fi
   fi
   echo ============ Round $i Finished ==================

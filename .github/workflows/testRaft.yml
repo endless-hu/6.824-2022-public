@@ -2,9 +2,6 @@
 name: Raft Test
 # run go test under src/raft when push to github
 on: 
-  push:
-    branches:
-      - main
   watch:
     types: started
 
