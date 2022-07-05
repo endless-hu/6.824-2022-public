@@ -1,9 +1,6 @@
 name: MapReduce Test
 # run tests against MapReduce when push to github
 on: 
-  push:
-    branches:
-      - main
   watch:
     types: started
 
