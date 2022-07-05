@@ -180,7 +180,7 @@ Finally, they will rename their own temp files into the formal files, i.e.`mr-0-
 
 *Please switch to the branch `mropt` if you want to read the source code and test.*
 
-According to [the former discussion](#How To Utilize It - From the Worker's Perspective), we can find out that the coordinator **DO NOT** need to wait for time out if it wants to *redistribute* a task. In fact, it can redistribute tasks *at any time*, EVEN IF there are multiple workers working on the same task. 
+According to [the former discussion](#how-to-utilize-it---from-the-workers-perspective), we can find out that the coordinator **DO NOT** need to wait for time out if it wants to *redistribute* a task. In fact, it can redistribute tasks *at any time*, EVEN IF there are multiple workers working on the same task. 
 
 Therefore, whenever a worker requests a task from the coordinator, if all tasks have been distributed currently, the coordinator can randomly pick a distributed task to reply to the worker, instead of letting the worker sleep. Thus, the coordinator can get a task done as soon as it receives the report from the fastest worker. 
 

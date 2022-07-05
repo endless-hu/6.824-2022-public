@@ -51,9 +51,9 @@ The detailed report can be found in [`docs/lab1.md`](docs/lab1.md).
 
 The relevant code files are:
 
-- [`src/mr/coordinator.go`](src/mr/coordinator.go)
-- [`src/mr/rpc.go`](src/mr/rpc.go)
-- [`src/mr/worker.go`](src/mr/worker.go)
+- `src/mr/coordinator.go`
+- `src/mr/rpc.go`
+- `src/mr/worker.go`
 
 ## Lab 2 - Raft
 
@@ -84,7 +84,7 @@ It will run the three tests designed for this part.
 
 **I RAN THE TESTS FOR 500 TIMES WITHOUT FAILURE!** The output of my run of test can be found at [docs/test_logs/test2A.log.txt](docs/test_logs/test2A.log.txt).
 
-For testing convenience, I provided the script [`test-many.sh`](src/raft/test-many.sh), so now you can run the tests as:
+For testing convenience, I provided the script [`test-many.sh`](scripts/test-many_lab2.sh)*(If you want to use it, please run it under `src/raft`)*, so now you can run the tests as:
 
 ```bash
 $ bash test-many.sh 2A 500
@@ -96,7 +96,7 @@ It has the same effect as running the `Go` test 500 times.
 
 **Result**: There's no big difference between mine and the instructors'.
 
-You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by processing [the test logs](docs/test_logs/).
+You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by [processing](scripts/calc_log_lab2.py) [the test logs](docs/test_logs/).
 
 **We both run the tests WITHOUT `-race`!**
 
@@ -148,7 +148,7 @@ It will run the tests designed for this part.
 
 **Results**: Under complex situations, my solution consumes **half** the traffic compared to the instructors'.
 
-You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by processing [the test logs](docs/test_logs/).
+You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by [processing](scripts/calc_log_lab2.py) [the test logs](docs/test_logs/).
 
 **We both run the tests WITHOUT `-race`!**
 
@@ -206,7 +206,7 @@ It will run the tests designed for this part.
 
 #### Performance Compared To the Instructors' Solution
 
-You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by processing [the test logs](docs/test_logs/).
+You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by [processing](scripts/calc_log_lab2.py) [the test logs](docs/test_logs/).
 
 **We both run the tests WITHOUT `-race`!**
 
@@ -266,7 +266,7 @@ It will run the tests designed for this part.
 
 #### Performance Compared To the Instructors' Solution
 
-You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by processing [the test logs](docs/test_logs/).
+You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by [processing](scripts/calc_log_lab2.py) [the test logs](docs/test_logs/).
 
 **We both run the tests WITHOUT `-race`!**
 
@@ -300,4 +300,4 @@ You can find the performance of MIT's solution on [the lab specification page](h
 
 The relevant code file(s) are:
 
-- [`src/raft/raft.go`](src/raft/raft.go)
+- `src/raft/raft.go`
