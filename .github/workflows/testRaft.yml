@@ -29,4 +29,4 @@ jobs:
       - name: "Run Raft Tests"
         run: |
           cd $GITHUB_WORKSPACE/6.824-golabs-2022/src/raft
-          bash test-many.sh 20
+          bash test-many.sh 2 20
