@@ -1,0 +1,32 @@
+
+name: Raft Test
+# run go test under src/raft when push to github
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      - "src/raft"
+  watch:
+    types: started
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.0
+        with:
+          go-version: 1.18.3
+
+      - name: Checkout Private Source Repository
+        uses: actions/checkout@v3
+        with:
+          repository: endless-hu/6.824
+          token: ${{ secrets.GH_PAT }}
+          path: 6.824-golabs-2022
+
+      - name: "Run Raft Tests"
+        run: |
+          cd $GITHUB_WORKSPACE/6.824-golabs-2022/src/raft
+          bash test-many.sh 20
