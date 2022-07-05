@@ -1,6 +1,9 @@
 name: MapReduce Test
 # run tests against MapReduce when push to github
 on: 
+  push:
+    branches:
+      - main
   watch:
     types: started
 
@@ -12,9 +15,6 @@ jobs:
         uses: actions/setup-go@v3.2.0
         with:
           go-version: 1.18.3
-
-      - name: Download Offial Repository
-        run: git clone git://g.csail.mit.edu/6.824-golabs-2022 6.824
       
       - name: Checkout Private Source Repository
         uses: actions/checkout@v3
@@ -23,10 +23,20 @@ jobs:
           token: ${{ secrets.GH_PAT }}
           path: my_repo
 
+      - name: Checkout This Repository
+        uses: actions/checkout@v3
+        with:
+          path: this_repo
+
       - name: "Run MapReduce Tests"
         # plugin my private source code into the original repository,
         run: |
-          cd $GITHUB_WORKSPACE/6.824/src
-          cp -r $GITHUB_WORKSPACE/my_repo/src/mr/ ./mr
+          git clone git://g.csail.mit.edu/6.824-golabs-2022 6.824
+          cd 6.824/src
+          cp $GITHUB_WORKSPACE/this_repo/scripts/go.mod .
+          cp $GITHUB_WORKSPACE/my_repo/src/mr/coordinator.go mr/coordinator.go
+          cp $GITHUB_WORKSPACE/my_repo/src/mr/worker.go mr/worker.go
+          cp $GITHUB_WORKSPACE/my_repo/src/mr/rpc.go mr/rpc.go
+          sha256sum mr/coordinator.go
           cd main
           bash test-mr-many.sh 100

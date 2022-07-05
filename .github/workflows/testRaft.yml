@@ -33,8 +33,9 @@ jobs:
         # plugin my private source code into the original repository, also copy the test script
         run: |
           git clone git://g.csail.mit.edu/6.824-golabs-2022 6.824
-          cd 6.824/src/raft
-          go version
-          cp $GITHUB_WORKSPACE/my_repo/src/raft/raft.go ./raft.go
+          cd 6.824/src
+          cp $GITHUB_WORKSPACE/this_repo/scripts/go.mod .
+          cd raft
+          cp $GITHUB_WORKSPACE/my_repo/src/raft/raft.go .
           cp $GITHUB_WORKSPACE/this_repo/scripts/test-many_lab2.sh ./test-many.sh
           bash test-many.sh 2 20
