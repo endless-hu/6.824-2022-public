@@ -1,6 +1,10 @@
 name: Test the workflow_dispacth
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+  push:
+  watch:
+    types: started
 
 jobs:
   test:
@@ -8,4 +12,3 @@ jobs:
     steps:
       - name: Test
         run: echo "Hello World"
-        
