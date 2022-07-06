@@ -1,4 +1,5 @@
 name: MapReduce Test
+# Will be triggered when I push to my private repo
 on: 
   workflow_dispatch:
   watch:
