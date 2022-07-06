@@ -1,6 +1,6 @@
 name: MapReduce Test
-# run tests against MapReduce when push to github
 on: 
+  workflow_dispatch:
   watch:
     types: started
 
