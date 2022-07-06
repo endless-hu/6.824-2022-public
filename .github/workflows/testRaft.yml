@@ -1,7 +1,7 @@
-
 name: Raft Test
-# run go test under src/raft when push to github
+# Will be triggered when I push to my private repo
 on: 
+  workflow_dispatch:
   watch:
     types: started
 
@@ -15,6 +15,7 @@ jobs:
           go-version: 1.18.3
 
       - name: Checkout Private Source Repository
+        # Get the private source code from the private repository.
         uses: actions/checkout@v3
         with:
           repository: endless-hu/6.824
@@ -22,6 +23,7 @@ jobs:
           path: my_repo
       
       - name: Checkout This Repository
+        # Get the test script from this public repository.
         uses: actions/checkout@v3
         with:
           path: this_repo
