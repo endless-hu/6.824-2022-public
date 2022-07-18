@@ -40,4 +40,4 @@ jobs:
           cp $GITHUB_WORKSPACE/my_repo/src/kvraft/client.go .
           cp $GITHUB_WORKSPACE/my_repo/src/kvraft/server.go .
           cp $GITHUB_WORKSPACE/my_repo/src/kvraft/common.go .
-          for i in {0..20}; do go test -race -timeout 15m; done
+          for i in {0..20}; do go test -timeout 15m; done
