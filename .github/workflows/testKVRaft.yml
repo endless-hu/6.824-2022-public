@@ -1,0 +1,43 @@
+name: KVRaft Test
+# Will be triggered when I push to my private repo
+on: 
+  workflow_dispatch:
+  watch:
+    types: started
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.0
+        with:
+          go-version: 1.18.3
+
+      - name: Checkout Private Source Repository
+        # Get the private source code from the private repository.
+        uses: actions/checkout@v3
+        with:
+          repository: endless-hu/6.824
+          token: ${{ secrets.GH_PAT }}
+          path: my_repo
+      
+      - name: Checkout This Repository
+        # Get the test script from this public repository.
+        uses: actions/checkout@v3
+        with:
+          path: this_repo
+
+      - name: "Run KVRaft Tests"
+        # plugin my private source code into the original repository
+        run: |
+          git clone git://g.csail.mit.edu/6.824-golabs-2022 6.824
+          cd 6.824/src
+          cp $GITHUB_WORKSPACE/this_repo/scripts/go.mod .
+          cd raft
+          cp $GITHUB_WORKSPACE/my_repo/src/raft/raft.go .
+          cd ../kvraft
+          cp $GITHUB_WORKSPACE/my_repo/src/kvraft/client.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/kvraft/server.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/kvraft/common.go .
+          for i in {0..20}; do go test -race -timeout 15m; done
