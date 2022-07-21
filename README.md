@@ -1,11 +1,12 @@
 # FOREWORD
 
+[![KVRaft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml)
 [![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)
 [![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)
 
 This is **my project report** for [MIT's 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
 
-**PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a public version of my project. I don't open my source code because it is a course project and I believe I'm obliged to help protect academic integrity.
+**PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a public version of my project. I **don't open my source code** because it is a course project and I believe I'm obliged to help protect academic integrity.
 
 # ENVIRONMENT SETUP
 
@@ -304,3 +305,59 @@ You can find the performance of MIT's solution on [the lab specification page](h
 The relevant code file(s) are:
 
 - `src/raft/raft.go`
+
+## Lab 3 - KV Raft
+
+### Goal
+
+Implement fault-tolerant key-value service upon the `Raft`. Specifically, implement the code of client and server:
+
+#### Client Side
+
+The client will randomly choose a server in the cluster to send its request. If the server is not a leader, then try another one. If the client detects a server, It's better to remember the server so it can submit the following instructions without trying randomly.
+
+Because the network may be unstable, the client may not successfully send its request or receive a reply from the leader. Therefore, if the request RPC fails, the client should resend it until it receives a reply.
+
+Provide the following functions to a client:
+
+- `PutAppend(key, value, op)`: `Put` will create a key-value pair. If such a pair already existed, replace the old one. `Append` will append to an existing key-value pair. If no such pair exists, it will create one.
+- `Get(key)`: Read the value associated with the `key`. If there is no such `key`, reply `ErrNoKey`.
+
+#### Server Side
+
+The server will provide RPC stubs for clients to call:
+
+- `PutAppend()`: Send the command to its `Raft` through `Raft.Start()`, and apply the command when it reads the command from `applyCh`. While waiting for the command to be replicated, block the RPC until the command is committed. 
+- `Get()`: The same as above. It is necessary to replicate it before executing it to ensure *linearizability*.
+
+Besides, a server should have a background go routine to monitor the `applyCh`, apply commands and notify RPCs waiting on the command to return.
+
+Additional notes:
+
+1. All read and write requests are sent through the leader to ensure *linearizability*. 
+2. Besides, to eliminate the potential *duplicated operations* caused by client resending, each request issued by the client should be marked with a unique `client ID` and sequence number so that the leader can distinguish them. The leader **should NOT** process the same *write* operation multiple times.
+
+### Testing
+
+I plan to run the tests 5000 times, estimated to be more than ten days. The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml) tested it 20 times without failure. 
+
+### One Remaining Issue
+
+I have not perfectly addressed the problem of performance. Since the client will not execute the next command until the previous one is applied, each heartbeat can only carry one command from one client, which cannot satisfy the `SpeedTest`.
+
+To deal with it, I use a trick in the client to detect whether it is under `SpeedTest`. If it is, it will cache the `PutAppend` instructions and return immediately so the tester can send the next command. When the cache is large enough(up to 20 commands), it will call a batch `PutAppend` on the leader so that the leader can carry 20 commands in one round heartbeat.
+
+**However,** this solution **CAN NOT** ensure **linearizability**!!! If a `PutAppend` operation returns, all subsequent `Get` should see its effect. However, in this cache optimization, the `PutAppend` operation may still be in the client's cache when it returns. 
+
+### Additional Words
+
+I do not plan to write a detailed report for this lab because its implementation is straightforward. 
+
+The only subtlety is how to notify blocked RPCs to return. You can use either *conditional variable* or *channel*.  No matter what measures you adopt, make sure that you know all situations in which the RPCs should return:
+
+1. When the command is applied;
+2. When the server is no longer the leader.
+
+You will probably need another go routine to periodically check if it's still the leader. Otherwise, if the server loses its leadership after it starts a command, the RPC may be blocked forever if there are no other clients submitting commands to the server.
+
+The relevant code is under `src/kvraft`.

@@ -1,3 +1,210 @@
+commit 7d1a38c674f02a919ce96b2a1fcd91276e0a0bb7
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Jul 21 17:02:32 2022 +0800
+
+    Add report for lab3
+
+commit c599facf0831e31766439d102f0238b19054ee0c
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Jul 21 13:38:12 2022 +0800
+
+    Change a function parameter `*map` to `map`
+    Because in Go, `map`s are references.
+
+commit aa57b1a51633f1554678d6c00725172644584889
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Jul 21 09:58:45 2022 +0800
+
+    Pass all Lab3 tests.
+    Add features in client side so that it can detect SpeedTest.
+    Under `SpeedTest`, it will use batch `PutAppend` to increase speed
+    However, batch `PutAppend` CANNOT guarantee linearizability!!!
+
+commit 81085589fd13e954c154a40ac8298b5163930295
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 20 15:12:49 2022 +0800
+
+    Naive implementation of Lab3
+    Always gaurantee linearizability, but fail `SpeedTest`
+
+commit c385bbe1ad1d9ba12f09af0b055e0987fe5839ce
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 20 15:11:01 2022 +0800
+
+    Changed the log checking order in `raft.go::AppendEntries`
+
+commit 497d3b80dadaf1a56db27e5cd1a3d6f87ce5f15b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 18 12:46:39 2022 +0800
+
+    Slightly improve the performance of raft
+
+commit 18fcec3d8dd4c7e14eb2d8b1d5dad48bd7d2b119
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 18 11:49:43 2022 +0800
+
+    client's `Get` will wait until all previous `Put`s executed
+
+commit 04c35ce59dd2beaecec01f2366edaa0acbd43228
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 18 11:12:02 2022 +0800
+
+    Passed all tests for once
+    ---
+    Fix a minor data race in `raft.go` with the logging statements
+    Add mechanism to trim the server's log, `nextSeqNo` will always
+    points to `cmdLog[0]`
+
+commit 420e195caaa725ed49aa3f4aae8a1aaa56d7c191
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 17 19:43:19 2022 +0800
+
+    Passed all tests in lab 3 EXCEPT snapshot size
+    I should trim server's state, namely each clerk's `cmdLog`
+
+commit 41c1e96c06caf61ea9bfd9b97a4b342a2c1aa49f
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 16 16:56:15 2022 +0800
+
+    Modify servers and clients so that
+    I can pass both SpeedTest and LinearizableTest.
+    The two tests are conflict because
+    SpeedTest requires the client working in async mode;
+    while LinearizableTest requires the client working in sync mode.
+    
+    In this commit, the server will tell the client to work asynchronously
+    when there's only one client
+
+commit 1b4a340ce0b3abde2adac7ebd5db8aee72301833
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 16 15:46:35 2022 +0800
+
+    Delete unnecessary data structures.
+    I do not need to retrieve execution results from `execLog`,
+      and `Get` only need to query once it is applied.
+
+commit 71f8ccc0789992db735ea70120e70d2331bfd81e
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 13 17:45:31 2022 +0800
+
+    Primarily passed all 3A tests before Persist.
+    ---
+    Fix some bugs in previous commit:
+    1. Cannot terminate `starter()`.
+    2. After `submitOp`, return true only if the op was applied.
+    3. In `submitOp`, allow resubmission.
+    All these fixes want to ensure that a command will be `start()`
+      and not got blocked by previous un`start()` commands
+
+commit 4123a2b7144f20041f0b2e5aa2849a560f3b4bab
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 13 16:07:17 2022 +0800
+
+    Modify client and server so that `PutAppend` supports two phase op.
+    ---
+    When client call `PutAppend`, it should return when the server
+    `start(op)` so that it can send next command immediately.
+    However, clients should wait until the command is applied.
+    
+    To address this problem, the client will first call `PutAppend`,
+    and the server will reply when it submits the command;
+    the client then immediately call `PutAppendRetrieve`, and wait for
+    the server to apply its command.
+
+commit f9b1a5d208f981e076496ebfd9f1f9dcf45d9dc0
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 13 14:52:03 2022 +0800
+
+    Primarily passed tests under unreliable network.
+    The main changes are:
+    1. Server will cache requests from future, and submit them when
+       it's their term. I use the slice instead of some rather
+       advanced data structures such as red-black tree.
+    2. The submission, start(), and apply() of a command must be
+       asynchronous. Each starter() thread will monitor all
+       requests from one clerk. When there're new commands coming in,
+       the `Put` or `Get` RPC will submit these commands and wake up
+       the starter() to start() sequential commands.
+    3. Add a monitor to constantly check server's leadership. If the
+       server is no longer a leader, it should notify all waiting RPCs
+       to return `ErrWrongLeader`. We cannot rely on RPCs to do this job
+       because if all clients are waiting for reply and not issueing
+       RPCs, and the server reverts to a follower, then the whole system
+       will stop work.
+
+commit b1e141d2d5e61e718d6bfb092321ed8b997d817c
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 13 11:50:26 2022 +0800
+
+    Now server will cache future commands
+    also supports concurrent multi-clients
+
+commit 5e2ea2e709d3bec226d8751f78de7cfa68746787
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jul 12 17:16:50 2022 +0800
+
+    Pass basic test and speed test. Add SeqNo to achieve linearizability
+
+commit 2f738c0232fe2c39e13fb251cc0635ff301405bb
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 10 19:00:33 2022 +0800
+
+    Modify the clerk side so that it suppoerts asynchronous requests
+    Added `ClerkID` and `SeqNum` fields in RPC arguments to achieve
+      exactly-once command.
+
+commit e580358a8456991943306ebc298461e20ed6a7ff
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 10 16:01:07 2022 +0800
+
+    Fix a data race in `applier()` and `AppendEntries()`
+    Now I do a deep copy so that the underlying array of slices
+    will never be accessed concurrently by the two threads
+
+commit 976cc3e4cc65e9809e0c8f0bcfe19278c1dd304d
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 10 09:36:21 2022 +0800
+
+    Passed lab 3A, basic test
+
+commit c822388767a48d1a9a3bde909b9ac97cdf285669
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 10 09:34:44 2022 +0800
+
+    The `leaderID` may not get updated, fix it
+
+commit ce58abd9aa2469d51de6d3caf389e34f81b09720
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 9 14:18:52 2022 +0800
+
+    Update github workflow configs
+
+commit 188eb4339f1ac8c99f9fd0ff64de7f7c44a11fb7
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 8 17:26:14 2022 +0800
+
+    Minor improvement to `raft.go`
+    Now leader will do clean up jobs when `exitCh` get a signal.
+    This is a more unified way to do these jobs.
+
+commit 52439eccaf38e5d78235da5b745eb67331caf582
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 6 10:37:20 2022 +0800
+
+    Add workflow triggers to my public repo's testing workflows
+
+commit 72c812149382db582f992ce3e3070ea8a98ec9d4
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jul 5 13:54:48 2022 +0800
+
+    Add github action auto test for Raft lab
+
+commit 0a136992c5fcdf9d0cd6c6fd461c4fcab728f374
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Jul 5 12:00:37 2022 +0800
+
+    Wrap up all in lab 2
+
 commit 2c6553093dfd8c69e537caf2d98b290979545635
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Mon Jul 4 14:13:48 2022 +0800
