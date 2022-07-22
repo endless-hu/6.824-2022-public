@@ -347,6 +347,46 @@ If a peer falls behind too much, its vote requests will never be granted by any 
 
    **Note:** This modification should be applied carefully, because there's a time gap between `leaderID` change and the state change. The `leader()` thread wakes up every 100ms, and the change of the state happens during the sleep. If the upper service wants to send command just after the state change, the `leaderID` has NOT been reset, and the Raft still *thinks* that it's the leader, and it will append commands to its log, but with a newer term, which is a fatal error.
 
+# Bug 6: Snapshots
+
+## Bug Description
+
+When I was testing Lab 3 and looking at its logs, I found that the raft did not behave correctly under some special senarios and causing `index out of range` error. It has something to do with the snapshot in Raft.
+
+### Execution Senario
+
+1. Initially, the system works fine.
+   
+   ![](figs/bug6/6-1.svg)
+
+2. Leader 3 receives some commands, and successfully replicated them on majority. It updates its `commitIndex` and sends these committed commands to the upper service. 
+   
+   The upper service realizes that the Raft has too many logs, so it issues a `Snapshot` to the Raft to trim the logs. **Note** that other followers have NOT realized the leader committed new logs.
+
+   ![](figs/bug6/6-2.svg)
+
+3. Before leader 3 sends its next round heartbeat, it receives some commands and then crashes. However, it is brought up again quickly and got reelected as the leader for term 2.
+   
+   Upon elected, it sends heartbeats and finds out that no follower has `commitIndex`s larger than the leader's `snapshotIndex`
+   
+   ![](figs/bug6/6-3.svg)
+
+4. Therefore, it has to send `InstallSnapshot`s to all followers.
+
+   ![](figs/bug6/6-4.svg)
+
+5. Because followers receiving `InstallSnapshot` will discard all logs, some logs committed by the leader but not committed by followers are lost. Assume the leader crashes after sending `InstallSnapshot`.
+
+   ![](figs/bug6/6-5.svg)
+
+6. Disagreement appears when another follower becomes the leader.
+
+   ![](figs/bug6/6-6.svg)
+
+## Solution
+
+`InstallSnapshot` should **NOT** discard all logs. It should preserve logs after `snapshotIndex`.
+
 # Afterword
 
-In fact, I fixed much more bugs than mentioned above. If you have interest, you can see [my commit histroy](../src_commit_log.txt).
+In fact, I fixed much more bugs than mentioned above. If you have interest, you can see my commit histroy.
