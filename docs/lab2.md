@@ -1,6 +1,6 @@
 # Lab 2 - Raft
 
-[Here](http://nil.lcs.mit.edu/6.824/2021/labs/lab-raft.html) is the original lab requirement.
+[Here](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) is the original lab requirement.
 
 Implement the `Raft` peers according to [this paper](http://nil.lcs.mit.edu/6.824/2021/papers/raft-extended.pdf) to form a fault-tolerant distributed system.
 

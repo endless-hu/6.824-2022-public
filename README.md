@@ -8,10 +8,6 @@ This is **my project report** for [MIT's 6.824 Distributed Systems, 2022 Spring]
 
 **PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a public version of my project. I **don't open my source code** because it is a course project and I believe I'm obliged to help protect academic integrity.
 
-# ENVIRONMENT SETUP
-
-The whole lab is developed under `Go`, so you should [set up the `Go` environment](http://nil.lcs.mit.edu/6.824/2022/labs/go.html) before testing my code. 
-
 # Project Overview
 
 ## Lab 1 - MapReduce
@@ -98,7 +94,7 @@ It has the same effect as running the `Go` test 500 times.
 
 #### Performance Compared To the Instructors' Solution
 
-**Result**: There's no big difference between mine and the instructors'.
+**Result**: There's no significant difference between mine and the instructors'.
 
 You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by [processing](scripts/calc_log_lab2.py) [the test logs](docs/test_logs/).
 
@@ -210,7 +206,7 @@ It will run the tests designed for this part.
 
 #### Performance Compared To the Instructors' Solution
 
-You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by [processing](scripts/calc_log_lab2.py) [the test logs](docs/test_logs/).
+You can find the performance of MIT's solution on [the lab specification page](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) on the course website. And you can easily calculate my solution's average performance by processing [the test logs](docs/test_logs/).
 
 **We both run the tests WITHOUT `-race`!**
 
@@ -304,7 +300,7 @@ You can find the performance of MIT's solution on [the lab specification page](h
 
 The relevant code file(s) are:
 
-- `src/raft/raft.go`
+- [`src/raft/raft.go`](src/raft/raft.go)
 
 ## Lab 3 - KV Raft
 
@@ -339,25 +335,10 @@ Additional notes:
 
 ### Testing
 
-I plan to run the tests 5000 times, estimated to be more than ten days. The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml) tested it 20 times without failure. 
+By now, I have tested it **2000 times** without failure.
 
-### One Remaining Issue
+### Detailed Report & Relevant Code
 
-I have not perfectly addressed the problem of performance. Since the client will not execute the next command until the previous one is applied, each heartbeat can only carry one command from one client, which cannot satisfy the `SpeedTest`.
-
-To deal with it, I use a trick in the client to detect whether it is under `SpeedTest`. If it is, it will cache the `PutAppend` instructions and return immediately so the tester can send the next command. When the cache is large enough(up to 20 commands), it will call a batch `PutAppend` on the leader so that the leader can carry 20 commands in one round heartbeat.
-
-**However,** this solution **CAN NOT** ensure **linearizability**!!! If a `PutAppend` operation returns, all subsequent `Get` should see its effect. However, in this cache optimization, the `PutAppend` operation may still be in the client's cache when it returns. 
-
-### Additional Words
-
-I do not plan to write a detailed report for this lab because its implementation is straightforward. 
-
-The only subtlety is how to notify blocked RPCs to return. You can use either *conditional variable* or *channel*.  No matter what measures you adopt, make sure that you know all situations in which the RPCs should return:
-
-1. When the command is applied;
-2. When the server is no longer the leader.
-
-You will probably need another go routine to periodically check if it's still the leader. Otherwise, if the server loses its leadership after it starts a command, the RPC may be blocked forever if there are no other clients submitting commands to the server.
+**The detailed report can be found in [`docs/lab3.md`](docs/lab3.md).**
 
 The relevant code is under `src/kvraft`.

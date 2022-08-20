@@ -1,3 +1,141 @@
+commit 6481c524b6769b86ca447a8091de180503361d7a
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Aug 20 11:45:00 2022 +0800
+
+    update docs for lab 2 & 3
+
+commit f130bfad8b3456ec412db60231d8682c59b93143
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Aug 20 10:39:34 2022 +0800
+
+    ShardKV: Framework setup.
+    I made each shard self-maintained so that it can transfer
+    between servers conveniently. Specifically:
+      1. Each shard has APIs for `Get`, `Put`, and `Append` to
+         conveniently execute kv ops.
+      2. Each write op should demonstrate the clientID and the SeqNo
+         to eliminate dups.
+      3. Client now will keep track of seqNo for each shard.
+    
+    Next: Amend the transfer procedure:
+      1. ONLY the leader is responsible for shards-transfer.
+      2. Every shards transfer should go through log so that it can
+         recover from crash.(raft will replay all logs when restarted)
+
+commit 5bd034cbe0fcda11944a850ed0ede6526abd68f5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 16 10:45:54 2022 +0800
+
+    Server side set up.
+    Passed the first test
+
+commit 31f57b068005161179c0e6fbb1b81fc3f17bf8db
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 16 09:54:05 2022 +0800
+
+    ShardKV: Finished client side
+
+commit 9d32e98685df4ad66cfd9a42fbc55abeb8647451
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Aug 7 19:17:32 2022 +0800
+
+    Modify kvraft to conform newer go standards. i.e remove `ioutil`
+    Also fix a small bug in kvraft server.
+    Previously I forgot to reset `readReady`.
+
+commit 2d1bd140b4c4ddbdf2d20e04984378603ca8d787
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Aug 4 10:18:30 2022 +0800
+
+    Slight changes to upper servers. Now `Get` will execute when
+    `applier` sets the `readReady` bit.
+    Add test scripts in Makefile.
+
+commit 26f169493bbb1b28ce05fb69baaf14608db74e1b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Aug 3 10:56:01 2022 +0800
+
+    Adjust the shardctrler server according to the change of Raft
+    Fix a bug in rebalace()
+
+commit 41f06d56e79b5999b7101f975c1a5f459e49b7c1
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 2 15:37:25 2022 +0800
+
+    Use another mechanism to ensure that the leader provides read
+    service only after it executed all commands before its empty log.
+    
+    Previous implementation relied on time delay to achieve this.
+    However, it was unreliable.
+
+commit 9ef78f4e7c7bf3b8f2f51b16841e2de6935736d5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Jul 27 14:31:10 2022 +0800
+
+    Amendment to previous commit.
+    The `Get` should sleep a little while AFTER ReadReady to ensure
+    that all commands are applied
+
+commit 58879b26b0b36b1099290cdb8e505336e46a7eb2
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 25 17:30:18 2022 +0800
+
+    Modify `kvraft` and `shardctrler`
+    ----
+    The server implementation has a bug. A `Get` operation
+    should wait for a little while to avoid racing with `applier`.
+    This will cause a problem when a leader just got elected. When it
+    sets `ReadReady` to true, it is possible that the commands in the
+    previous term was captured but didn't get applied in the kv server.
+
+commit ff8d63ab829bf36a7aaea2ca9222a8fba0778220
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Jul 25 12:50:23 2022 +0800
+
+    A better algorithm to rebalance config shards
+
+commit b3b0f7de0f406824a8ad7aa358960d84762e53ec
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Jul 24 16:15:02 2022 +0800
+
+    Lab4A passed
+
+commit 3b46aed65e89a356b97f6d654e7294824e80c4e5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 23 17:18:05 2022 +0800
+
+    fix a bug in previous commit:
+    Server should NOT hold lock when waiting for ReadReady
+
+commit 34c79b5cda37efc0296b2097a41ce2f9026f29fc
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 23 14:29:23 2022 +0800
+
+    Modify raft and kvraft so that it can provide instant `Get`
+    instead of replicating `Get` before return.
+
+commit 872b665f37265fcdf970ef37d9ecba666e418ba6
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Jul 23 09:01:48 2022 +0800
+
+    Fix a race problem in kvraft/server.go
+
+commit a8ee40a7f40656d1fae3416c2142c4facb7e5a92
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Jul 22 16:42:30 2022 +0800
+
+    Add docs for another bug found during KVRaft testing.
+    Also optimize the snapshot. KV Sever will not take snapshots
+    if no message read from `applyCh`
+
+commit 9995e776336a30012eb7c2f1199b683d4ddd5e1f
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Jul 21 17:29:58 2022 +0800
+
+    Raft: Fixed a race condition when sending heartbeat
+    Because slices are references, I have to deep copy them
+    when using them as arguments in heartbeat.
+
 commit 7d1a38c674f02a919ce96b2a1fcd91276e0a0bb7
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Thu Jul 21 17:02:32 2022 +0800
