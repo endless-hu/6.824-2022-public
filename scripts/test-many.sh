@@ -8,12 +8,6 @@
 # !WARN: You should NOT use the -race because the test configuration has data race with 
 # the raft logger when clean up the test environment
 
-if ! pwd | grep -q src/raft; then
-    echo NOT under the correct path!
-    echo Correct path is 6.824/src/raft
-    exit
-fi
-
 if (($# < 2))
 then
     echo Usage:

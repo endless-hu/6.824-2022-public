@@ -1,4 +1,4 @@
-name: KVRaft Test
+name: ShardCtrler Test
 # Will be triggered when I push to my private repo
 on: 
   workflow_dispatch:
@@ -28,17 +28,17 @@ jobs:
         with:
           path: this_repo
 
-      - name: "Run KVRaft Tests"
-        # plugin my private source code into the original repository
+      - name: "Run ShardCtrler Tests"
+        # plugin my private source code into the original repository, also copy the test script
         run: |
           git clone git://g.csail.mit.edu/6.824-golabs-2022 6.824
           cd 6.824/src
           cp $GITHUB_WORKSPACE/this_repo/scripts/go.mod .
           cd raft
           cp $GITHUB_WORKSPACE/my_repo/src/raft/raft.go .
-          cd ../kvraft
-          cp $GITHUB_WORKSPACE/my_repo/src/kvraft/client.go .
-          cp $GITHUB_WORKSPACE/my_repo/src/kvraft/server.go .
-          cp $GITHUB_WORKSPACE/my_repo/src/kvraft/common.go .
+          cd ../shardctrler
+          cp $GITHUB_WORKSPACE/my_repo/src/shardctrler/client.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/shardctrler/server.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/shardctrler/common.go .
           cp $GITHUB_WORKSPACE/this_repo/scripts/test-many.sh ./test-many.sh
-          bash test-many.sh 3 500
+          bash test-many.sh Test 500
