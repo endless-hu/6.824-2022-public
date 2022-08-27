@@ -1,12 +1,18 @@
 # FOREWORD
 
-[![KVRaft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml)
-[![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)
-[![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)
+[![ShardKV Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml)  Repeat 500 times
 
-This is **my project report** for [MIT's 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
+[![ShardCtrler Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml)  Repeat 500 times
 
-**PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a public version of my project. I **don't open my source code** because it is a course project and I believe I'm obliged to help protect academic integrity.
+[![KVRaft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml)  Repeat 500 times
+
+[![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)  Repeat 500 times
+
+[![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)  Repeat 500 times
+
+This is **my project report** for [MIT 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
+
+**PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a **public version** of my project. I **don't open my source code** because it is a course project and I believe I'm obliged to help protect academic integrity.
 
 # Project Overview
 
@@ -57,9 +63,9 @@ The relevant code files are:
 
 ## Lab 2 - Raft
 
-[Here](http://nil.lcs.mit.edu/6.824/2021/labs/lab-raft.html) is the original lab requirement.
+[Here](http://nil.lcs.mit.edu/6.824/2022/labs/lab-raft.html) is the original lab requirement.
 
-I'm going to implement the `Raft` peers according to [this paper](http://nil.lcs.mit.edu/6.824/2021/papers/raft-extended.pdf) so that they can form a fault-tolerant distributed system.
+I'm going to implement the `Raft` peers according to [this paper](http://nil.lcs.mit.edu/6.824/2022/papers/raft-extended.pdf) so that they can form a fault-tolerant distributed system.
 
 ### Part A: Leader Election
 
@@ -304,6 +310,8 @@ The relevant code file(s) are:
 
 ## Lab 3 - KV Raft
 
+[Here](http://nil.lcs.mit.edu/6.824/2022/labs/lab-kvraft.html) is the original lab requirements.
+
 ### Goal
 
 Implement fault-tolerant key-value service upon the `Raft`. Specifically, implement the code of client and server:
@@ -335,10 +343,58 @@ Additional notes:
 
 ### Testing
 
-By now, I have tested it **2000 times** without failure.
+The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml) tested it **500 times without failure**. By now, I have tested it **2000 times** without failure.
 
 ### Detailed Report & Relevant Code
 
 **The detailed report can be found in [`docs/lab3.md`](docs/lab3.md).**
 
 The relevant code is under `src/kvraft`.
+
+## Lab 4 - ShardKV
+
+[Here](http://nil.lcs.mit.edu/6.824/2022/labs/lab-shard.html) is the original lab requirement.
+
+### Goal
+
+Build a key-value storage system that partitions the key over a set of replica groups. 
+
+A shard is a subset of the total key-value pairs, and each replica group handles multiple shards. The distribution of shards should be balanced so that the throughput of the system can be maximized. 
+
+#### Lab 4A: Shard Controller
+
+There will be a fault-tolerant shard controller to decide the distribution of the shards. It provides 4 APIs to administrator clients: `Join`, `Leave`, `Move`, and `Query`.
+
+- For `Join` and `Leave` operations, a list of groups will be provided to the shard controller. The controller will add or delete these groups, and balance the rest of the system. **Note** that rebalancing should ensure **minimum shards transfer**. 
+- For `Move` operations, the administrator wants a specific replica group to handle a particular shard. In this case, automatic rebalancing is not needed.
+- For `Query` operations, because each operation on the system will create a new version of the config, the shard controller should return any version of the config specified in the operation arguments. The controller will return the newest config if the version is -1 or bigger than the newest version number.
+
+The **main challenge** is to design a deterministic algorithm to balance shards. For more information, please refer to [the detailed report](docs/lab4.md). 
+
+Besides, we **must optimize `Query`**, a read operation. In other words, we cannot allow read operations to go through replication procedures because it greatly delays query response time. This is crucial in Lab 4B, where sharded KV servers will query the newest config every 100ms. 
+
+#### Lab 4B: Shard KV Server
+
+Each shard KV server is a single machine. Several such machines form a replica group, and several groups form the shard KV system. The number of groups in a system can vary, but the number of machines in a Raft cluster never changes. 
+
+The sharded KV servers will poll the shard controller every 100ms to get the latest config. When reconfigure happens, they will transfer shards among each other **without** the inconsistent state being observed by clients.
+
+The system provides **linearizable** `Put`, `Append`, and `Get` APIs to clients.
+
+##### Non-credit challenges
+
+1. Implement the deletion feature that a replica group will **delete any shards that it no longer handles**. The original lab did not require the deletion of shards when they were transferred. This will cause a huge waste of machine memories. 
+
+2. Optimize the service quality while transferring shards. It is convenient to simply stop all operations while handing over shards, but we can continue executing operations on those shards that are not transferring without harming linearizability. 
+
+   Further, if a replica group received partial shards, it can immediately start operating on these shards, without waiting for receiving all shards.
+
+### Testing
+
+The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tested the [shard controller](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml) and [shard KV](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml) **500 times without failure**. 
+
+### Detailed Report
+
+**The detailed report can be found in [`docs/lab4.md`](docs/lab4.md).**
+
+The relevant code is under `src/shardctrler` and `src/shardkv`.

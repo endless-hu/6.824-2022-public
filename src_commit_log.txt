@@ -1,3 +1,202 @@
+commit 406b94962db604595eaa36c9fae596d27683c060
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Aug 27 13:45:59 2022 +0800
+
+    Lab4 : Passed all tests. Need further testing.
+    ---
+    Raft:
+    Fix corner cases in `Snapshot` and `InstallSnapshot`. Specifically
+      1. It is possible to advance rf.commitIndex while installing
+         snapshot. For example, when two same `InstallSnaphot`s come
+         at the same time, one finished before the other grab rf.mu
+         again after sending its snapshot.
+      2. When taking snapshot, before checking if the raft took the
+         same snapshot before, I should ensure the log is non-empty.
+    ---
+    shardkv:
+    After the server received all shards, it will issue RPCs to all
+    other groups with its config version and the shards it is
+    responsible for. Other groups will delete these shards if they have
+    older config versions.
+
+commit 8566e38fb10791013a0f93ca9474e2e5a1917f99
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Aug 26 13:44:49 2022 +0800
+
+    ShardKV:
+    
+    make all members of `InMemoryShard` private, provide more APIs for
+    interacting.
+    
+    Set up framework for cleaning shards.
+
+commit 9cea7b187a62d6105021d655bd6ccee201dca169
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Aug 26 13:25:25 2022 +0800
+
+    Modify shardctrler and shardkv to adopt raft changes.
+
+commit b3bd9a4af66236b17cf86d46ec99966fd3cfbf83
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Aug 26 12:35:20 2022 +0800
+
+    Raft & KV Raft:
+    update the design of ReadReady.
+
+commit 12bae81c5f4b108bf264251f40ae5df0488efcde
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Aug 25 16:57:59 2022 +0800
+
+    Lab 4:
+    Passed challenge 2.
+
+commit 580b23de3c58b18abdd2425fc82b6161bc78b61e
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Aug 25 12:32:18 2022 +0800
+
+    ShardKV:
+    * Key Fix: `monitor` goroutine should never return. Now I passed
+        Unreliable test 10 times. Should do further tests.
+    ------
+    Add struct `InMemoryShard` for server.
+    Set up framework for challenges.
+
+commit 667905303655b0b1b02f2bf1fe7df2416c56dd98
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Aug 25 11:03:27 2022 +0800
+
+    ShardKV:
+    Amended the transfer procedures. Now shards can correctly transfer
+    between groups.
+    I decoupled leadership monitor and config change monitor so that
+    the serer will not be trapped in waiting to retrieve shards even
+    when it is no longer the leader.
+    -----
+    Next:
+    The initial design was to address challenges as well. However,
+    there were some flaws in RPC logics. For example, I should not
+    allow write ops to execute before I receive the corresponding
+    shards.
+
+commit d6b094e60e9f66938c2986d3425b84e3675eb2b5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Aug 24 20:24:20 2022 +0800
+
+    Lab 4A: Redesigned shardctrler.
+    Add some tests to ensure correctness of shardctrler.
+    ----
+    The use of a temporary config is not a feasible solution.
+    It is necessary to design an algorithm to deterministically balance
+    the shards among groups.
+
+commit 102f4622a246e7dd8b5caf8b028a607bb1b21a54
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Aug 24 11:10:38 2022 +0800
+
+    lab 4A: Fix a bug in shardctrler.
+    
+    Previouly I used a temporary variable `currentCfg` to represent the
+    newest UNAPPLIED config in leader.
+    It was unsafe if leader changed because the follower did not know
+    what the newest UNAPPLIED config was, thus causing errors when
+    operating on some stale configs.
+    
+    To amend it, I
+    1. add `readReady` check before every RPC stub so that the leader
+       is at the newest state when it operates on `currentCfg`.
+    2. when `applyCmd`, update `currentCfg` if it was behind the config
+       being applied.
+
+commit 234fa78a96209c07824e509a17179fada72ef249
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 23 10:29:48 2022 +0800
+
+    Raft:
+        Remove the `Command` field of the vestigal log after taking a
+        snapshot. `Command` may occupy a large amount of memory, but
+        it will never be used again after the snapshot.
+    -----
+    ShardKV:
+        Remove the periodic `Snapshot` in the `monitor` goroutine,
+        since `Snapshot` after applying command is enough to clean up
+        memory.
+
+commit 986dbca6f48747ef9d05eb7bf6398f4bc3d3cba1
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 23 09:47:36 2022 +0800
+
+    Lab 4: Passed all tests under reliable network
+    ---
+    Raft:
+        Delete an unnecessary comparison in `AppendEntries`, because
+        not all commands are comparable.
+    ---
+    ShardKV:
+    Changed how shards are moved.
+       Initially, I picked the design that once a config change is
+       detected, the group leader will send its shards to all
+       receivers.
+       However, this design introduced more complexity: A group should
+       wait for other groups to send it shards, and it should send
+       shards to other groups.
+    
+       Now the groups will proactively ask other groups for shards in
+       new config.
+       (TODO) After shards are retrieved, the retriever can call
+       retrievee again to notify retrievee to clean these shards.
+    ---
+    Next:
+       Double check the shard movement procedures so that even
+       under unreliable networks, which means that leader reelection
+       could occur when it is retrieving shards, the system still
+       ensure correctness.
+
+commit b982a4502bb90814d46254790538ee7d77c65fb2
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Aug 21 13:20:33 2022 +0800
+
+    Lab4: Pass TestJoinLeave.
+    ---
+    After `PutAppend` RPC was waken up, it should check whether the
+    leader still serves the shard. If not, immediately reply
+    ErrWronGroup so that the client will submit commands to the
+    corresponding group.
+
+commit a4d97645529394fb5128cf56d2961df10bf9f355
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Aug 21 11:34:12 2022 +0800
+
+    Lab4: Passed TestStaticShards.
+    -------
+    Some redesigns:
+    1. All config updates will go through log, including ReceiveShards,
+       change `kv.config`.
+    2. I will send an end command when changing `kv.config`.
+    3. Amended transfer functions. However, I should pay attention to
+       it when testing under unreliable networks.
+
+commit 7eaff7b18947824b843169a91d33180e140bb209
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Aug 21 09:56:27 2022 +0800
+
+    Lab4: server redesign && Implemented-receive shard function.
+    -----
+    1. AppliedSeqNo will be maintained within a shard PER client. Any
+       pending RPCs should consult corresponding shard to know whether
+       their commands have been applied.
+    2. ReceiveShard will go through log to ensure crash recovery.
+    3. Only the leader is responsible for transfer and receive shards.
+    -----
+    TODO:
+    1. Amend the transfer shards functions.
+    2. (For 4B) Look closely at snapshot related functions such as
+       `encodeState` and `installSnapshot`. Because some structures
+       are changed in ShardKV, the snapshot state should be
+       reconsidered.
+    3. (For challenge) After the leader knows that other groups have
+       successfully received its shards, it should notify all followers
+       (and itself) to discard these shards.
+
 commit 6481c524b6769b86ca447a8091de180503361d7a
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Sat Aug 20 11:45:00 2022 +0800

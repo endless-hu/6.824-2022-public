@@ -37,4 +37,4 @@ jobs:
           cp $GITHUB_WORKSPACE/my_repo/src/mr/rpc.go mr/rpc.go
           sha256sum mr/coordinator.go
           cd main
-          bash test-mr-many.sh 100
+          bash test-mr-many.sh 500

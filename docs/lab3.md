@@ -94,7 +94,6 @@ type KVServer struct {
 	dead      int32 // set by Kill()
 	persister *raft.Persister
 	isLeader  int32 // not leader->0, leader->currentTerm
-	readReady int32
 
 	maxraftstate int // snapshot if log grows this big
 
@@ -120,7 +119,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
     reply.Err = ErrWrongLeader
     return
   }
-  for atomic.LoadInt32(&kv.readReady) <= 0 {
+  for kv.rf.IsReadReady() {
     time.Sleep(100*ms)
     if I am not leader now {
       reply.Err = ErrWrongLeader
@@ -152,9 +151,9 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 }
 ```
 
-#### Backgroud Go Routines
+#### Background Go Routines
 
-Backgroud Goroutines play important roles in notifying pending RPCs to return. You can use either *conditional variable* or *channel*.  No matter what measures you adopt, make sure that you know all situations in which the RPCs should return:
+Background Goroutines play important roles in notifying pending RPCs to return. You can use either *conditional variable* or *channel*.  No matter what measures you adopt, make sure that you know all situations in which the RPCs should return:
 
 1. When the command is applied;
 2. When the server is no longer the leader.
@@ -186,15 +185,7 @@ One routine should monitor the leadership status:
 func (kv *KVServer) leadershipMonitor {
   for !kv.killed() {
     if I am not leader {
-      broad cast all pending RPCs
-    } else {
-      // if I am ready to provide read service
-      if readReady := atomic.LoadInt32(&kv.rf.ReadReady);
-        (atomic.LoadInt32(&kv.isLeader) > 0) &&
-			((readReady == 1 && appliedIndex == 0) ||
-				(readReady != 0 && appliedIndex >= readReady))  {
-        atomic.StoreInt32(&kv.readReady, 1)
-      }
+      broadcast all pending RPCs
     }
   }
   time.Sleep(100*ms)
@@ -219,10 +210,10 @@ A better idea to achieve BOTH speed and linearizability is to implement cache co
 
 In that case, an additional fault-tolerant `LockServer` is required to manage locks:
 
-- When a client wants to **read**, it gets *S-lock* over the key and cache the value with *a lease*;
-- When a client wants to **write**, it gets X-lock over the key, cache the value with a lease, continuously renew the lease, and perform all writes locally. 
-- When a client **releases the lock**, it should ensure all writes were applied in the server. 
-- When other client wants to **get lock over the same key**, the Lock Server can either:
+- When a client wants to **read**, it gets *S-lock* over the key and caches the value with *a lease*;
+- When a client wants to **write**, it gets X-lock over the key, caches the value with a lease, continuously renews the lease, and performs all writes locally. 
+- When a client **releases the lock**, it should ensure all writes were applied to the server. 
+- When another client wants to **get a lock over the same key**, the Lock Server can either:
   
   1. Wait for the previous client to release the lock;
   2. Wait for the previous lease to expire;
