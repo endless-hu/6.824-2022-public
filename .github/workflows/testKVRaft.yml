@@ -41,4 +41,4 @@ jobs:
           cp $GITHUB_WORKSPACE/my_repo/src/kvraft/server.go .
           cp $GITHUB_WORKSPACE/my_repo/src/kvraft/common.go .
           cp $GITHUB_WORKSPACE/this_repo/scripts/test-many.sh ./test-many.sh
-          bash test-many.sh 3 500
+          bash test-many.sh 3 30

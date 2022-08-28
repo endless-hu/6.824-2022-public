@@ -37,4 +37,4 @@ jobs:
           cd raft
           cp $GITHUB_WORKSPACE/my_repo/src/raft/raft.go .
           cp $GITHUB_WORKSPACE/this_repo/scripts/test-many.sh ./test-many.sh
-          bash test-many.sh 2 500
+          bash test-many.sh 2 40
