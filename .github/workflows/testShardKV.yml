@@ -47,4 +47,4 @@ jobs:
           cp $GITHUB_WORKSPACE/my_repo/src/shardkv/util.go .
           
           cp $GITHUB_WORKSPACE/this_repo/scripts/test-many.sh ./test-many.sh
-          bash test-many.sh Test 150
+          bash test-many.sh Test 140

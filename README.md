@@ -1,14 +1,14 @@
 # FOREWORD
 
-[![ShardKV Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml)  Repeat 500 times
+[![ShardKV Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml)  Repeat 140 times
 
 [![ShardCtrler Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml)  Repeat 500 times
 
-[![KVRaft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml)  Repeat 500 times
+[![KVRaft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml)  Repeat 30 times
 
-[![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)  Repeat 500 times
+[![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)  Repeat 40 times
 
-[![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)  Repeat 500 times
+[![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)  Repeat 100 times
 
 This is **my project report** for [MIT 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
 
@@ -391,7 +391,7 @@ The system provides **linearizable** `Put`, `Append`, and `Get` APIs to clients.
 
 ### Testing
 
-The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tested the [shard controller](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml) and [shard KV](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml) **500 times without failure**. 
+The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tested the [shard controller](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml) *500 times* and [shard KV](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml) *150 times* **without failure**. 
 
 ### Detailed Report
 

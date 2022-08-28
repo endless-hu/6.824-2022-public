@@ -14,6 +14,8 @@ A *shard* is a subset of the total key-value pairs, and each replica group handl
 
 We can directly modify lab3's code to implement the shard controller. They share the same structure. The only difference is that the shard controller should maintain a slice of configs instead of a key-value map.
 
+**NOTE**: The `slice` and `map ` in Go are *references*. Simple assignment `=` will make the variable points to the same map or slice. Therefore, when appending a modified config to the config slice
+
 ### Core Algorithm: Rebalancing
 
 We must **ensure the determinism** of the rebalancing algorithm. 
