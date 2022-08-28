@@ -1,3 +1,16 @@
+commit 862af6739c0e419566d9ee6b542a798fb2071b37
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Aug 28 14:52:40 2022 +0800
+
+    ShardKV: try to eliminate dup when retrieving shards.
+    Update report for lab 4.
+
+commit 59f1da4c6ec83329f61e11143780122e67860279
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Aug 28 12:49:48 2022 +0800
+
+    ShardKV: Fix a bug of transferring shards.
+
 commit 406b94962db604595eaa36c9fae596d27683c060
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Sat Aug 27 13:45:59 2022 +0800
