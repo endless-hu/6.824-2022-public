@@ -391,7 +391,7 @@ The system provides **linearizable** `Put`, `Append`, and `Get` APIs to clients.
 
 ### Testing
 
-The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tested the [shard controller](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml) *500 times* and [shard KV](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml) *150 times* **without failure**. 
+The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tested the [shard controller](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml) *500 times* and [shard KV](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml) *140 times* **without failure**. 
 
 ### Detailed Report
 

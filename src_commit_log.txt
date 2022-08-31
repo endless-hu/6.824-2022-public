@@ -1,3 +1,19 @@
+commit fcf24fab8a62ca43686cfd8bf370f578543545d1
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 30 20:32:35 2022 +0800
+
+    Raft:
+    Modify the code relevant to index translation.
+    Add boudary check in `translateToInternalIndex()`,
+    Add warning output on translation failure.
+
+commit c20af9a36bfb84e4b67ea3abb89384f46c5692aa
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Aug 30 13:44:56 2022 +0800
+
+    Raft:
+    Add boudary check in `InstallSnapshot` and `Snapshot`.
+
 commit 862af6739c0e419566d9ee6b542a798fb2071b37
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Sun Aug 28 14:52:40 2022 +0800
