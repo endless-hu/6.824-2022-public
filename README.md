@@ -308,6 +308,10 @@ The relevant code file(s) are:
 
 - [`src/raft/raft.go`](src/raft/raft.go)
 
+### Holistic Tests After Completion
+
+I have tested Raft **5000** times without failure.
+
 ## Lab 3 - KV Raft
 
 [Here](http://nil.lcs.mit.edu/6.824/2022/labs/lab-kvraft.html) is the original lab requirements.
@@ -343,7 +347,7 @@ Additional notes:
 
 ### Testing
 
-The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml) tested it **500 times without failure**. By now, I have tested it **2000 times** without failure.
+The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml) tested it **30 times without failure**. By now, I have tested it **2000 times** without failure.
 
 ### Detailed Report & Relevant Code
 
@@ -398,3 +402,19 @@ The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tes
 **The detailed report can be found in [`docs/lab4.md`](docs/lab4.md).**
 
 The relevant code is under `src/shardctrler` and `src/shardkv`.
+
+## Exploratory Project: Frangipani-Like KV Raft
+
+The idea of this project occurred when I was implementing [lab 3 - KV Raft](#lab-3---kv-raft).
+
+### Goal
+
+Implement a *high-performance* KV Raft *without* harming *linearizability*.
+
+### Testing
+
+The code still has some problems under unreliable networks. I'm debugging it. 
+
+### Detailed Report
+
+**The detailed report can be found in [`docs/README.md`](docs/frangipani.md).**

@@ -1,0 +1,133 @@
+<mxfile host="65bd71144e">
+    <diagram id="W6bzn5BLehHzSlYxRYl9" name="Page-1">
+        <mxGraphModel dx="503" dy="614" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="Remote Lock Manager Server" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="610" y="100" width="150" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Remote File System Server&lt;br&gt;(You can image it as a disk)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="300" width="186" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="" style="group;fontSize=13;fontStyle=1" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="90" y="10" width="380" height="530" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="7" vertex="1">
+                    <mxGeometry y="30" width="380" height="450" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Client Computer" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="7" vertex="1">
+                    <mxGeometry x="77.5" width="115" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="" style="edgeStyle=none;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;strokeWidth=3;" parent="7" source="10" target="11" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="1. Read file &quot;xyz&quot;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;fontStyle=1" parent="13" vertex="1" connectable="0">
+                    <mxGeometry x="0.184" y="2" relative="1" as="geometry">
+                        <mxPoint x="-2" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="10" value="Application" style="rounded=1;whiteSpace=wrap;html=1;" parent="7" vertex="1">
+                    <mxGeometry x="75.63" y="40" width="194.37" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="7" vertex="1">
+                    <mxGeometry x="20" y="140" width="340" height="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="frangipani" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="7" vertex="1">
+                    <mxGeometry x="10" y="90" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="Local Lock Manager" style="rhombus;whiteSpace=wrap;html=1;" parent="7" vertex="1">
+                    <mxGeometry x="140" y="220" width="110" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=none;strokeWidth=3;" parent="7" source="17" target="9" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="155" y="120" as="sourcePoint"/>
+                        <mxPoint x="330" y="190" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="17" value="2. Is &quot;xyz&quot; Locked?" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=13;" parent="7" vertex="1">
+                    <mxGeometry x="127.82" y="160" width="73.75" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="" style="endArrow=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.381;exitY=-0.001;exitDx=0;exitDy=0;exitPerimeter=0;strokeWidth=3;" parent="7" source="11" target="17" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="195" y="130" as="sourcePoint"/>
+                        <mxPoint x="225" y="165" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" value="Local File System&lt;br&gt;(Cached some files in the remote file system)" style="rounded=0;whiteSpace=wrap;html=1;" parent="7" vertex="1">
+                    <mxGeometry x="42.5" y="400" width="295" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.394;entryY=-0.11;entryDx=0;entryDy=0;startArrow=none;entryPerimeter=0;strokeWidth=3;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="7" source="23" target="21" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="290" y="300" as="sourcePoint"/>
+                        <mxPoint x="340" y="250" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="23" value="2.1 yes&lt;br style=&quot;font-size: 13px;&quot;&gt;(read from local cache)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#00FF00;fontStyle=1;fontSize=13;" parent="7" vertex="1">
+                    <mxGeometry x="140" y="320" width="90" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="endArrow=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.613;entryY=-0.048;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=3;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="7" source="9" target="23" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="187.5" y="300" as="sourcePoint"/>
+                        <mxPoint x="206.25" y="470" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="25" value="" style="endArrow=classic;html=1;exitX=0.164;exitY=-0.06;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.065;entryY=1.053;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=11;strokeWidth=3;" parent="7" source="21" target="10" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="290" y="270" as="sourcePoint"/>
+                        <mxPoint x="340" y="220" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="26" value="3. Return &quot;xyz&quot;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#0000FF;fontStyle=1;fontSize=12;" parent="25" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1042" y="1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="29" value="" style="endArrow=classic;html=1;exitX=0.033;exitY=0.727;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontColor=#FF0000;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;" parent="1" source="2" target="9" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="380" y="280" as="sourcePoint"/>
+                        <mxPoint x="430" y="230" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="30" value="2.2.2&lt;br style=&quot;font-size: 12px;&quot;&gt;Wait until grant the shared lock" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF0000;fontSize=12;fontStyle=1" parent="29" vertex="1" connectable="0">
+                    <mxGeometry x="-0.5087" y="2" relative="1" as="geometry">
+                        <mxPoint x="7" y="7" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="" style="endArrow=classic;html=1;exitX=0.907;exitY=0.6;exitDx=0;exitDy=0;exitPerimeter=0;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;" parent="1" source="9" target="3" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="380" y="270" as="sourcePoint"/>
+                        <mxPoint x="430" y="220" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="2.2.3 &lt;br style=&quot;font-size: 12px;&quot;&gt;Remote read &quot;xyz&quot;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF0000;fontSize=12;fontStyle=1" parent="31" vertex="1" connectable="0">
+                    <mxGeometry x="0.3471" y="-3" relative="1" as="geometry">
+                        <mxPoint x="20" y="2" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="33" value="" style="endArrow=classic;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" parent="1" source="3" target="21" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="380" y="260" as="sourcePoint"/>
+                        <mxPoint x="430" y="210" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="34" value="2.2.4&lt;br style=&quot;font-size: 12px;&quot;&gt;Read &quot;xyz&quot; to local FS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF0000;fontSize=12;fontStyle=1" parent="33" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2666" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="35" value="" style="endArrow=classic;html=1;exitX=0.682;exitY=0.215;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#FF0000;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;exitPerimeter=0;" parent="1" source="9" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="282.5" y="240" as="sourcePoint"/>
+                        <mxPoint x="628" y="155" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="36" value="2.2.1 No&lt;br style=&quot;font-size: 12px;&quot;&gt;(Get shared lock on &quot;xyz&quot;)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF0000;fontSize=12;fontStyle=1" parent="35" vertex="1" connectable="0">
+                    <mxGeometry x="0.3746" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-161" y="28" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
