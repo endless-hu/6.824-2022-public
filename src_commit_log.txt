@@ -1,3 +1,136 @@
+commit e0296db0eebd69a314c21c269dc32521b4cb8709
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Sep 10 16:08:02 2022 +0800
+
+    Add docs for Frangipani
+
+commit 8a414f0cf3f66c725e490e7563361900d9c2a23b
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Sep 10 15:02:56 2022 +0800
+
+    Raft: Bug fix.
+    I add `Round` in `AppendEntries`-related functions.
+    Follower will abort old heartbeats, and the leader will NOT
+    process heartbeat results from old rounds.
+
+commit 02e516720fe5bccd28f33822dfba9c656e9d7f93
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sat Sep 10 11:36:04 2022 +0800
+
+    ShardKV server: Bug fix.
+    line 397: When dup "ReceiveShards" detected, I should let it
+        update `kv.appliedIndex` instead of return.
+    ----
+    Update README.md: add report for frangipani.
+
+commit 5f994afe4ab719e386c964a369d7ddc48a48894d
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Sep 9 10:10:53 2022 +0800
+
+    Update raft, frangipani:
+    1. Turn on debug options. I found there were some bugs.
+    2. For `frangipani::client`, I slightly tuned the `PutAppend` rate.
+       Previously I set the rate to 10ms/op, which is too slow.
+    3. For `frangipani::server`, the `Get` op should be processed when
+       the leader is ready to provide read service.
+       Besides, I optimized the structure of applying commands from
+       `applyCh`.
+
+commit 7dfff50cbc79f45237660d8a435b5b5111d56dcb
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Sep 5 17:47:56 2022 +0800
+
+    Turn off debug mode in all projects.
+
+commit ef0da377e86ed3c73ac835a21856184d058b07b5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Sep 5 17:25:19 2022 +0800
+
+    Frangipani completed, passed all tests.
+    
+    NOTE: I add `sleep` statements before client `PutAppend`. Remove
+    the statement can unleash the full performance of Frangipani.
+    
+    However, be careful to do this! Many tests will fail because the
+    performance is so strong that it consumes too much memory, causing
+    the OS to kill the testing program.
+
+commit 844ff2e8d6d72e7e405e9b337a19c045d70426f4
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Sep 5 15:53:39 2022 +0800
+
+    Raft: small bug fix.
+    In `InstallSnapshot`, after sending the snapshot to the upper
+    service, Raft should not check term numbers.
+    Otherwise, if term number change happens at the same time when
+    sending snapshots, `InstallSnapshot` will stop post jobs, causing
+    stale logs remaining and abnormality when `Snapshot` wants to
+    translate indices.
+
+commit d728009d455cc1599a7c7d47b8447dc0447339a2
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Sep 4 17:33:43 2022 +0800
+
+    frangipani:
+    
+    1. Client should delete kv pairs after it unlocks the key.
+    2. Prettify client logging.
+    3. Add linearizable test under unreliable network conditions.
+       (have not passed it yet)
+
+commit 70b37147b83b8d37ff051c34ba49a4dae2673975
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Fri Sep 2 21:06:58 2022 +0800
+
+    Pass basic linearizable tests.
+    -------
+    Add suitable tests for frangipani:
+        Tests should focus on random keys, which is the weakness of
+        frangipani.
+    -------
+    Main changes:
+      1. Optimize the logging in client. I aim at minimizing
+         unnecessary logs.
+      2. Optimize `LockManagerClient`. The client should distinguish
+         lock status and expiration status.
+      3. The command sequence number for flushing(put) and getting (get)
+        should be seperated because `put` will modify server's `kvMap`,
+        but `get` only modifies server's `lockManager`. Besides, the
+        `put` and `get` may interleave, which makes it necessary to
+        seperate them to avoid missing executions.
+      4. For kvserver, adjust necessary functions to the change of
+         seperated `appliedIndex`.
+
+commit 0b3cec1ab458526cac5587cf9aaf26773eac4ef6
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Sep 1 20:44:43 2022 +0800
+
+    Add comments in `server.go` because there is a race condition.
+    However, the race condition does NOT affect correctness.
+
+commit 48c94e5a85d14c659ccd31184f7955fa2a50a7dc
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Sep 1 18:15:51 2022 +0800
+
+    Frangipani:
+       Passed SpeedTest in 0.6s.
+       Still many problems on both client side and server side.
+
+commit 5fe5248a4ee3e946a3d174630dce4630617cb821
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Thu Sep 1 18:12:31 2022 +0800
+
+    Fix readReadyIssues: See the comments in raft.go:131.
+    Modify kvservers to adjust to the change of `IsReadReady` API.
+
+commit 0b41f0ae87275d707aa0a989094bd5190b316e66
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Wed Aug 31 18:52:45 2022 +0800
+
+    Start developping frangipani-style kvserver.
+    Modified `server.go`.
+    Some framework setup.
+
 commit fcf24fab8a62ca43686cfd8bf370f578543545d1
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Tue Aug 30 20:32:35 2022 +0800
