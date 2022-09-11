@@ -1,9 +1,6 @@
 name: ShardKV Test
 # Will be triggered when I push to my private repo
-on: 
-  workflow_dispatch:
-  watch:
-    types: started
+on: workflow_dispatch
 
 jobs:
   test:
