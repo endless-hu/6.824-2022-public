@@ -37,9 +37,9 @@ jobs:
           cp -r $GITHUB_WORKSPACE/this_repo/frangipani .
           cd frangipani
           cp $GITHUB_WORKSPACE/this_repo/scripts/test-many.sh ./test-many.sh
-          bash test-many.sh 3 30
+          bash test-many.sh Test 30
 
           echo "---------------------------"
           echo "Run Speed Test"
-          sed '105d' client.go -i
+          sed '98d' client.go -i
           go test -run Speed
