@@ -6,6 +6,9 @@
 
 [![KVRaft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testKVRaft.yml)  Repeat 30 times
 
+[![Frangipani Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testFrangipani.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testFrangipani.yml)
+(Exploratory Project, repeat 30 times)
+
 [![Raft Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testRaft.yml)  Repeat 40 times
 
 [![MapReduce Test](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml/badge.svg)](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testMR.yml)  Repeat 100 times
@@ -13,6 +16,8 @@
 This is **my project report** for [MIT 6.824 Distributed Systems, 2022 Spring](http://nil.lcs.mit.edu/6.824/2022/schedule.html).
 
 **PLEASE NOTE:** The hyperlinks to my **source code** in this repo are **INVALID!!!** This is a **public version** of my project. I **don't open my source code** because it is a course project and I believe I'm obliged to help protect academic integrity.
+
+**If you want to INSPECT or TEST my code, please contact me at `zj_hu [at] zju.edu.cn` and demonstrate your identity first.**
 
 # Project Overview
 
@@ -397,6 +402,8 @@ The system provides **linearizable** `Put`, `Append`, and `Get` APIs to clients.
 
 The [GitHub Action](https://github.com/endless-hu/6.824-2022-public/actions) tested the [shard controller](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardCtrler.yml) *500 times* and [shard KV](https://github.com/endless-hu/6.824-2022-public/actions/workflows/testShardKV.yml) *140 times* **without failure**. 
 
+Additionally, I tested them 500 times without failure.
+
 ### Detailed Report
 
 **The detailed report can be found in [`docs/lab4.md`](docs/lab4.md).**
@@ -413,7 +420,9 @@ Implement a *high-performance* KV Raft *without* harming *linearizability*.
 
 ### Testing
 
-The code still has some problems under unreliable networks. I'm debugging it. 
+The *GitHub Action* tested it 30 times.
+
+I plan to test it 500 times. The testing is still on-going.
 
 ### Detailed Report
 
