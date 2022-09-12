@@ -176,7 +176,7 @@ func (ck *Clerk) processRenew(args RenewLeaseArgs, reply RenewLeaseReply) {
 		var issuedTime time.Time
 		if len(issuedTimeData) > 1 {
 			if issuedTime.GobDecode(issuedTimeData) != nil {
-				ck.logger.Fatalf("[processRenew] Error decoding issuedTime. reply: %+v\n", reply)
+				log.Fatalf("[processRenew] Error decoding issuedTime. reply: %+v\n", reply)
 			}
 		}
 		ck.lockManager.RenewLock(args.Keys[i], issuedTime)
@@ -206,7 +206,7 @@ func (ck *Clerk) get(key string) {
 				if reply.Err == OK {
 					var issuedTime time.Time
 					if issuedTime.GobDecode(reply.IssuedTime) != nil {
-						ck.logger.Fatalf("[get] Error decoding issuedTime")
+						log.Fatalf("[get] Error decoding issuedTime")
 					}
 					ck.logger.Printf("[get] {%v} key %v locked, issued time: %v\n\n",
 						strconv.FormatInt(ck.myID, 10)[:4], key, issuedTime)
@@ -227,7 +227,7 @@ func (ck *Clerk) get(key string) {
 				} else if reply.Err == ErrDup {
 					var issuedTime time.Time
 					if issuedTime.GobDecode(reply.IssuedTime) != nil {
-						ck.logger.Fatalf("[GET] Error decoding issuedTime")
+						log.Fatalf("[GET] Error decoding issuedTime")
 					}
 					ck.logger.Printf("[get] {%v} key %v: leader returns %v, issued time: %v\n\n",
 						strconv.FormatInt(ck.myID, 10)[:4], key, reply.Err, issuedTime)
@@ -250,7 +250,7 @@ func (ck *Clerk) get(key string) {
 				ck.leaderID = tryServer
 				var issuedTime time.Time
 				if issuedTime.GobDecode(reply.IssuedTime) != nil {
-					ck.logger.Fatalf("[get] Error decoding issuedTime")
+					log.Fatalf("[get] Error decoding issuedTime")
 				}
 				ck.logger.Printf("[get] {%v} key %v: leader %v returns %+v, issuedTime: %v\n\n",
 					strconv.FormatInt(ck.myID, 10)[:4], key, tryServer, reply.Err, issuedTime)
@@ -272,7 +272,7 @@ func (ck *Clerk) get(key string) {
 			} else if reply.Err == ErrDup {
 				var issuedTime time.Time
 				if issuedTime.GobDecode(reply.IssuedTime) != nil {
-					ck.logger.Fatalf("[GET] Error decoding issuedTime")
+					log.Fatalf("[GET] Error decoding issuedTime")
 				}
 				ck.logger.Printf("[get] {%v} key %v: leader %v returns %v, issued time: %v\n\n",
 					strconv.FormatInt(ck.myID, 10)[:4], key, tryServer, reply.Err, issuedTime)

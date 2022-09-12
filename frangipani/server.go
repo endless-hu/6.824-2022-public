@@ -91,7 +91,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		var err error
 		reply.IssuedTime, err = time.Now().GobEncode()
 		if err != nil {
-			kv.logger.Fatalf("[GET] encode time error: %v\n", err)
+			log.Fatalf("[GET] encode time error: %v\n", err)
 		}
 		kv.logger.Printf("[GET] Already locked. args: %+v, reply: %+v. my state: %v\n",
 			args, reply, kv.reportState())
@@ -132,7 +132,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		var err error
 		reply.IssuedTime, err = time.Now().GobEncode()
 		if err != nil {
-			kv.logger.Fatalf("[GET] encode time error: %v\n", err)
+			log.Fatalf("[GET] encode time error: %v\n", err)
 		}
 	} else {
 		reply.Err = ErrLocked
@@ -217,7 +217,7 @@ func (kv *KVServer) RenewLease(args *RenewLeaseArgs, reply *RenewLeaseReply) {
 			var err error
 			reply.IssuedTime[i], err = time.Now().GobEncode()
 			if err != nil {
-				kv.logger.Fatalf("[RENEWLEASE] encode time error: %v\n", err)
+				log.Fatalf("[RENEWLEASE] encode time error: %v\n", err)
 			}
 		}
 	}
