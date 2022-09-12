@@ -1,3 +1,11 @@
+commit 6168eb28ae2bdb7945ce1973894892c7847f9006
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Sun Sep 11 15:53:32 2022 +0800
+
+    Frangipani: Bug fix in client side.
+    Bettered the logic of clients waiting for locks.
+    Canceled the `Fatalf` in relevant code.
+
 commit e0296db0eebd69a314c21c269dc32521b4cb8709
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Sat Sep 10 16:08:02 2022 +0800

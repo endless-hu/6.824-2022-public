@@ -3,6 +3,7 @@ package frangipani
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -422,7 +423,7 @@ func GenericTestSpeed(t *testing.T, part string, maxraftstate int) {
 	const heartbeatInterval = 100 * time.Millisecond
 	const opsPerInterval = 3
 	const timePerOp = heartbeatInterval / opsPerInterval
-	// log.Printf("Rate: %v/op\n", dur/numOps)
+	log.Printf("Rate: %v/op\n", dur/numOps)
 	if dur > numOps*timePerOp {
 		t.Fatalf("Operations completed too slowly %v/op > %v/op\n", dur/numOps, timePerOp)
 	}
@@ -678,7 +679,7 @@ func TestSnapshotRecover3B(t *testing.T) {
 
 func TestSnapshotRecoverManyClients3B(t *testing.T) {
 	// Test: restarts, snapshots, many clients (3B) ...
-	GenericTest(t, "3B", 20, 5, false, true, false, 1000, false, time.Second)
+	GenericTest(t, "3B", 20, 5, false, true, false, 1000, false, 5*time.Second)
 }
 
 func TestSnapshotUnreliable3B(t *testing.T) {

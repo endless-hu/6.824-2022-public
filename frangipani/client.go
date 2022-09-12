@@ -72,22 +72,17 @@ func (ck *Clerk) Get(key string) string {
 	ck.mu.Lock()
 	defer ck.mu.Unlock()
 
-	// See if we hold the lock of the key
-	if ck.lockManager.IsLocked(key) {
-		for ck.lockManager.LockExpired(key) {
-			ck.logger.Printf("[GET] {%v} key %v expired, waiting for renewer to renew it...\n", strconv.FormatInt(ck.myID, 10)[:4], key)
+	for ck.lockManager.LockExpired(key) {
+		if !ck.lockManager.IsLocked(key) {
+			ck.get(key)
+		} else {
+			ck.logger.Printf("[GET] {%v} key %v expired, waiting for renewer to renew it...\n",
+				strconv.FormatInt(ck.myID, 10)[:4], key)
 			ck.cond.Wait()
-			if !ck.lockManager.IsLocked(key) {
-				ck.logger.Printf("[GET] {%v} Fail to renew the lock of key %v, try to get the lock\n", strconv.FormatInt(ck.myID, 10)[:4], key)
-				ck.get(key)
-			}
 		}
-		if !ck.lockManager.IsLocked(key) || ck.lockManager.LockExpired(key) {
-			ck.logger.Fatalf("[FATAL] Get the lock over key %v, but lock not valid\n", key)
-		}
-		return ck.kvMap[key]
 	}
-	return ck.get(key)
+
+	return ck.kvMap[key]
 }
 
 // shared by Put and Append.
@@ -99,45 +94,26 @@ func (ck *Clerk) Get(key string) string {
 // must match the declared types of the RPC handler function's
 // arguments. and reply must be passed as a pointer.
 func (ck *Clerk) PutAppend(key string, value string, op string) {
-	//
 	// Comment the following line to unleash the power of Frangipani
-	//
 	time.Sleep(5 * time.Millisecond)
 
 	ck.mu.Lock()
 	defer ck.mu.Unlock()
 
-	// See if we hold the lock of the key
-	if ck.lockManager.IsLocked(key) {
-		for ck.lockManager.LockExpired(key) {
-			ck.logger.Printf("[PUT] {%v} key %v expired, waiting for renewer to renew it...\n", strconv.FormatInt(ck.myID, 10)[:4], key)
-			ck.cond.Wait()
-			if !ck.lockManager.IsLocked(key) {
-				ck.logger.Printf("[PUT] {%v} Fail to renew the lock of key %v, try to get the lock\n", strconv.FormatInt(ck.myID, 10)[:4], key)
-				ck.get(key)
-			}
-		}
-		if !ck.lockManager.IsLocked(key) || ck.lockManager.LockExpired(key) {
-			ck.logger.Fatalf("[FATAL] Get the lock over key %v, but lock not valid\n", key)
-		}
-		if op == "Put" {
-			ck.kvMap[key] = value
+	for ck.lockManager.LockExpired(key) {
+		if !ck.lockManager.IsLocked(key) {
+			ck.get(key)
 		} else {
-			ck.kvMap[key] += value
+			ck.logger.Printf("[PUT] {%v} key %v expired, waiting for renewer to renew it...\n",
+				strconv.FormatInt(ck.myID, 10)[:4], key)
+			ck.cond.Wait()
 		}
-		return
 	}
 
-	// Else, try to get the lock and get the value
-	ck.get(key)
-	if ck.lockManager.IsLocked(key) && !ck.lockManager.LockExpired(key) {
-		if op == "Put" {
-			ck.kvMap[key] = value
-		} else {
-			ck.kvMap[key] += value
-		}
+	if op == "Put" {
+		ck.kvMap[key] = value
 	} else {
-		ck.logger.Fatalf("[FATAL] I just get the lock over key %v, but the lock is invalid. lm : %+v\n", key, ck.lockManager)
+		ck.kvMap[key] += value
 	}
 }
 
@@ -214,9 +190,8 @@ func (ck *Clerk) processRenew(args RenewLeaseArgs, reply RenewLeaseReply) {
 }
 
 // Get the lock from the remote server, store the value into ck.kvMap
-// and return the value.
 // Called with ck.mu locked.
-func (ck *Clerk) get(key string) string {
+func (ck *Clerk) get(key string) {
 	ck.logger.Printf("[get] {%v} Try to get the lock of the key %v\n", strconv.FormatInt(ck.myID, 10)[:4], key)
 
 	ck.getCmdSeqNo++
@@ -237,7 +212,7 @@ func (ck *Clerk) get(key string) string {
 						strconv.FormatInt(ck.myID, 10)[:4], key, issuedTime)
 					ck.lockManager.Lock(key, issuedTime)
 					ck.kvMap[key] = reply.Value
-					return reply.Value
+					return
 				} else if reply.Err == ErrLocked {
 					ck.mu.Unlock()
 					ck.logger.Printf("[get] {%v} the key %v is locked, wait for the lock to be released\n",
@@ -258,7 +233,7 @@ func (ck *Clerk) get(key string) string {
 						strconv.FormatInt(ck.myID, 10)[:4], key, reply.Err, issuedTime)
 					ck.lockManager.Lock(key, issuedTime)
 					ck.kvMap[key] = reply.Value
-					return ck.kvMap[key]
+					return
 				}
 			}
 			ck.leaderID = -1
@@ -281,7 +256,7 @@ func (ck *Clerk) get(key string) string {
 					strconv.FormatInt(ck.myID, 10)[:4], key, tryServer, reply.Err, issuedTime)
 				ck.lockManager.Lock(key, issuedTime)
 				ck.kvMap[key] = reply.Value
-				return reply.Value
+				return
 			} else if reply.Err == ErrLocked {
 				ck.leaderID = tryServer
 				ck.logger.Printf("[get] {%v} the key %v is locked, wait for the lock to be released\n",
@@ -303,7 +278,7 @@ func (ck *Clerk) get(key string) string {
 					strconv.FormatInt(ck.myID, 10)[:4], key, tryServer, reply.Err, issuedTime)
 				ck.lockManager.Lock(key, issuedTime)
 				ck.kvMap[key] = reply.Value
-				return ck.kvMap[key]
+				return
 			}
 		}
 	}
