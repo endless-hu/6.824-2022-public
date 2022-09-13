@@ -33,7 +33,6 @@ type GetArgs struct {
 	Key string
 	// You'll have to add definitions here.
 	ClerkID int64
-	SeqNo   int
 }
 
 type GetReply struct {

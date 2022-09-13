@@ -21,8 +21,7 @@ type Clerk struct {
 
 	mu          sync.Mutex
 	cond        *sync.Cond
-	getCmdSeqNo int // first command is number 1
-	putCmdSeqNo int
+	putCmdSeqNo int // first command is number 1
 	kvMap       map[string]string
 	lockManager LockManagerClient
 
@@ -95,7 +94,6 @@ func (ck *Clerk) Get(key string) string {
 // arguments. and reply must be passed as a pointer.
 func (ck *Clerk) PutAppend(key string, value string, op string) {
 	// Comment the following line to unleash the power of Frangipani
-	time.Sleep(5 * time.Millisecond)
 
 	ck.mu.Lock()
 	defer ck.mu.Unlock()
@@ -176,7 +174,7 @@ func (ck *Clerk) processRenew(args RenewLeaseArgs, reply RenewLeaseReply) {
 		var issuedTime time.Time
 		if len(issuedTimeData) > 1 {
 			if issuedTime.GobDecode(issuedTimeData) != nil {
-				log.Fatalf("[processRenew] Error decoding issuedTime. reply: %+v\n", reply)
+				ck.logger.Fatalf("[processRenew] Error decoding issuedTime. reply: %+v\n", reply)
 			}
 		}
 		ck.lockManager.RenewLock(args.Keys[i], issuedTime)
@@ -194,8 +192,7 @@ func (ck *Clerk) processRenew(args RenewLeaseArgs, reply RenewLeaseReply) {
 func (ck *Clerk) get(key string) {
 	ck.logger.Printf("[get] {%v} Try to get the lock of the key %v\n", strconv.FormatInt(ck.myID, 10)[:4], key)
 
-	ck.getCmdSeqNo++
-	args := GetArgs{key, ck.myID, ck.getCmdSeqNo}
+	args := GetArgs{key, ck.myID}
 
 	for {
 		if ck.leaderID != -1 {
@@ -206,7 +203,7 @@ func (ck *Clerk) get(key string) {
 				if reply.Err == OK {
 					var issuedTime time.Time
 					if issuedTime.GobDecode(reply.IssuedTime) != nil {
-						log.Fatalf("[get] Error decoding issuedTime")
+						ck.logger.Fatalf("[get] Error decoding issuedTime")
 					}
 					ck.logger.Printf("[get] {%v} key %v locked, issued time: %v\n\n",
 						strconv.FormatInt(ck.myID, 10)[:4], key, issuedTime)
@@ -219,15 +216,13 @@ func (ck *Clerk) get(key string) {
 						strconv.FormatInt(ck.myID, 10)[:4], key)
 					time.Sleep(200 * time.Millisecond)
 					ck.mu.Lock()
-					ck.getCmdSeqNo++
-					args.SeqNo = ck.getCmdSeqNo
 					ck.logger.Printf("[get] {%v} retry to get the key %v. args: %+v\n",
 						strconv.FormatInt(ck.myID, 10)[:4], key, args)
 					continue
 				} else if reply.Err == ErrDup {
 					var issuedTime time.Time
 					if issuedTime.GobDecode(reply.IssuedTime) != nil {
-						log.Fatalf("[GET] Error decoding issuedTime")
+						ck.logger.Fatalf("[GET] Error decoding issuedTime")
 					}
 					ck.logger.Printf("[get] {%v} key %v: leader returns %v, issued time: %v\n\n",
 						strconv.FormatInt(ck.myID, 10)[:4], key, reply.Err, issuedTime)
@@ -250,7 +245,7 @@ func (ck *Clerk) get(key string) {
 				ck.leaderID = tryServer
 				var issuedTime time.Time
 				if issuedTime.GobDecode(reply.IssuedTime) != nil {
-					log.Fatalf("[get] Error decoding issuedTime")
+					ck.logger.Fatalf("[get] Error decoding issuedTime")
 				}
 				ck.logger.Printf("[get] {%v} key %v: leader %v returns %+v, issuedTime: %v\n\n",
 					strconv.FormatInt(ck.myID, 10)[:4], key, tryServer, reply.Err, issuedTime)
@@ -264,15 +259,13 @@ func (ck *Clerk) get(key string) {
 				ck.mu.Unlock()
 				time.Sleep(200 * time.Millisecond)
 				ck.mu.Lock()
-				ck.getCmdSeqNo++
-				args.SeqNo = ck.getCmdSeqNo
 				ck.logger.Printf("[get] {%v} retry to get the key %v. args: %+v\n",
 					strconv.FormatInt(ck.myID, 10)[:4], key, args)
 				continue
 			} else if reply.Err == ErrDup {
 				var issuedTime time.Time
 				if issuedTime.GobDecode(reply.IssuedTime) != nil {
-					log.Fatalf("[GET] Error decoding issuedTime")
+					ck.logger.Fatalf("[GET] Error decoding issuedTime")
 				}
 				ck.logger.Printf("[get] {%v} key %v: leader %v returns %v, issued time: %v\n\n",
 					strconv.FormatInt(ck.myID, 10)[:4], key, tryServer, reply.Err, issuedTime)

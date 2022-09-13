@@ -28,9 +28,8 @@ type Op struct {
 }
 
 type ClerkMetaData struct {
-	appliedIndexGet int
-	appliedIndexPut int
-	condReply       *sync.Cond // wake up when the cmd is applied or I'm not leader
+	appliedIndex int
+	condReply    *sync.Cond // wake up when the cmd is applied or I'm not leader
 }
 
 type KVServer struct {
@@ -91,7 +90,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		var err error
 		reply.IssuedTime, err = time.Now().GobEncode()
 		if err != nil {
-			log.Fatalf("[GET] encode time error: %v\n", err)
+			kv.logger.Fatalf("[GET] encode time error: %v\n", err)
 		}
 		kv.logger.Printf("[GET] Already locked. args: %+v, reply: %+v. my state: %v\n",
 			args, reply, kv.reportState())
@@ -99,26 +98,20 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 	}
 
 	if kv.lockManager.IsLocked(args.Key) {
+		kv.logger.Printf("[GET] Key %v already locked by %v. args: %+v\n",
+			args.Key, kv.lockManager.LockTable[args.Key], args)
 		reply.Err = ErrLocked
 		return
 	}
 
-	clerk := kv.getClerk(args.ClerkID)
-	if clerk.appliedIndexGet >= args.SeqNo {
-		reply.Err = ErrLocked
-		kv.logger.Printf("[GET] Already executed. clerk.appliedIndex = %v, args: %+v, reply: %+v\n",
-			clerk.appliedIndexGet, args, reply)
-		return
-	}
-	_, _, ok := kv.rf.Start(Op{"Get", map[string]string{args.Key: ""}, args.ClerkID, args.SeqNo})
+	idx, _, ok := kv.rf.Start(Op{"Get", map[string]string{args.Key: ""}, args.ClerkID, 0})
 	if !ok {
 		reply.Err = ErrWrongLeader
 		return
 	}
 
-	for clerk.appliedIndexGet < args.SeqNo {
-		kv.logger.Printf("[GET] Wait. clerk.appliedIndexGet = %v, args: %+v\n", clerk.appliedIndexGet, args)
-		kv.clerks[args.ClerkID].condReply.Wait()
+	for kv.appliedIndex < idx {
+		kv.getClerk(args.ClerkID).condReply.Wait()
 		_, isleader = kv.rf.GetState()
 		if !isleader {
 			reply.Err = ErrWrongLeader
@@ -132,7 +125,7 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 		var err error
 		reply.IssuedTime, err = time.Now().GobEncode()
 		if err != nil {
-			log.Fatalf("[GET] encode time error: %v\n", err)
+			kv.logger.Fatalf("[GET] encode time error: %v\n", err)
 		}
 	} else {
 		reply.Err = ErrLocked
@@ -152,9 +145,10 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 	defer kv.mu.Unlock()
 
 	clerk := kv.getClerk(args.ClerkID)
-	if clerk.appliedIndexPut >= args.SeqNo {
+	if clerk.appliedIndex >= args.SeqNo {
 		reply.Err = OK
-		kv.logger.Printf("[PUTAPPEND] Already executed. clerk.appliedIndexPut = %v, args: %+v\n", clerk.appliedIndexPut, args)
+		kv.logger.Printf("[PUTAPPEND] Already executed. clerk.appliedIndexPut = %v, args: %+v\n",
+			clerk.appliedIndex, args)
 		return
 	}
 	_, _, ok := kv.rf.Start(Op{"Put", args.KVMap, args.ClerkID, args.SeqNo})
@@ -163,8 +157,9 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
 		return
 	}
 
-	for clerk.appliedIndexPut < args.SeqNo {
-		kv.logger.Printf("[PUTAPPEND] Wait. clerk.appliedIndex = %v, args: %+v\n", clerk.appliedIndexPut, args)
+	for clerk.appliedIndex < args.SeqNo {
+		kv.logger.Printf("[PUTAPPEND] Wait. clerk.appliedIndex = %v, args: %+v\n",
+			clerk.appliedIndex, args)
 		kv.clerks[args.ClerkID].condReply.Wait()
 		_, isleader = kv.rf.GetState()
 		if !isleader {
@@ -217,7 +212,7 @@ func (kv *KVServer) RenewLease(args *RenewLeaseArgs, reply *RenewLeaseReply) {
 			var err error
 			reply.IssuedTime[i], err = time.Now().GobEncode()
 			if err != nil {
-				log.Fatalf("[RENEWLEASE] encode time error: %v\n", err)
+				kv.logger.Fatalf("[RENEWLEASE] encode time error: %v\n", err)
 			}
 		}
 	}
@@ -306,6 +301,11 @@ func (kv *KVServer) applier() {
 			kv.mu.Lock()
 			kv.logger.Printf("Apply %+v\n", msg)
 			if msg.CommandValid {
+				if msg.CommandIndex <= kv.appliedIndex {
+					kv.logger.Printf("[APPLIER] Current Index: %v, msg.Index: %v. Skip!\n",
+						kv.appliedIndex, msg.CommandIndex)
+					continue
+				}
 				kv.applyCmd(msg)
 			} else if msg.SnapshotValid {
 				kv.installSnapshot(msg.Snapshot)
@@ -323,15 +323,9 @@ func (kv *KVServer) applyCmd(msg raft.ApplyMsg) {
 
 	clerk := kv.getClerk(op.ClerkID)
 	// Skip the message if it was executed before
-	if op.OpType == "Get" && op.SeqNo <= clerk.appliedIndexGet {
-		kv.logger.Printf("Skip the message: %+v. Current applied Get seq no: %v\n", op, clerk.appliedIndexGet)
-		if kv.appliedIndex < msg.CommandIndex {
-			kv.appliedIndex = msg.CommandIndex
-		}
-		return
-	}
-	if op.OpType == "Put" && op.SeqNo <= clerk.appliedIndexPut {
-		kv.logger.Printf("Skip the message: %+v. Current applied Put seq no: %v\n", op, clerk.appliedIndexGet)
+	if op.OpType == "Put" && op.SeqNo <= clerk.appliedIndex {
+		kv.logger.Printf("Skip the message: %+v. Current applied Put seq no: %v\n",
+			op, clerk.appliedIndex)
 		if kv.appliedIndex < msg.CommandIndex {
 			kv.appliedIndex = msg.CommandIndex
 		}
@@ -343,20 +337,16 @@ func (kv *KVServer) applyCmd(msg raft.ApplyMsg) {
 			kv.kvMap[key] = val
 			kv.lockManager.Unlock(key)
 		}
-		clerk.appliedIndexPut = op.SeqNo
+		clerk.appliedIndex = op.SeqNo
 	} else if op.OpType == "Get" {
 		for key := range op.KVMap {
 			kv.lockManager.Lock(key, op.ClerkID)
 		}
-		clerk.appliedIndexGet = op.SeqNo
 	}
 
-	kv.logger.Printf("Applied Op: %+v. ClerkInfo: {appliedIndexPut: %v, appliedIndexGet: %v}\n",
-		op, kv.clerks[op.ClerkID].appliedIndexPut, kv.clerks[op.ClerkID].appliedIndexGet)
+	kv.logger.Printf("Applied Op: %+v. ClerkInfo: {appliedIndex: %v}\n",
+		op, kv.clerks[op.ClerkID].appliedIndex)
 
-	if msg.CommandIndex <= kv.appliedIndex {
-		log.Fatalln("applier: command index is smaller than applied index")
-	}
 	kv.appliedIndex = msg.CommandIndex
 }
 
@@ -368,9 +358,8 @@ func (kv *KVServer) applyCmd(msg raft.ApplyMsg) {
 func (kv *KVServer) getClerk(clerkID int64) *ClerkMetaData {
 	if _, ok := kv.clerks[clerkID]; !ok {
 		kv.clerks[clerkID] = &ClerkMetaData{
-			appliedIndexGet: 0,
-			appliedIndexPut: 0,
-			condReply:       sync.NewCond(&kv.mu),
+			appliedIndex: 0,
+			condReply:    sync.NewCond(&kv.mu),
 		}
 	}
 	return kv.clerks[clerkID]
@@ -413,13 +402,11 @@ func (kv *KVServer) installSnapshot(data []byte) {
 	var appliedIndex int
 	var kvMap map[string]string
 	var lockManager LockManagerServer
-	var clerksAppliedIndexGet map[int64]int
-	var clerksAppliedIndexPut map[int64]int
+	var clerksAppliedIndex map[int64]int
 	if d.Decode(&appliedIndex) != nil ||
 		d.Decode(&kvMap) != nil ||
 		d.Decode(&lockManager) != nil ||
-		d.Decode(&clerksAppliedIndexGet) != nil ||
-		d.Decode(&clerksAppliedIndexPut) != nil {
+		d.Decode(&clerksAppliedIndex) != nil {
 		log.Fatalln("Failed to read persistent state")
 	}
 
@@ -427,20 +414,16 @@ func (kv *KVServer) installSnapshot(data []byte) {
 		kv.logger.Println("Snapshot is older than current state")
 		return
 	}
-	kv.logger.Printf("Snapshot to install: {appliedIndex: %v, \nkvMap: %v, \nlock manager: %+v,\nclerksAppliedIndexGet: %+v, Put: %+v}\n",
-		appliedIndex, kvMap, lockManager, clerksAppliedIndexGet, clerksAppliedIndexPut)
+	kv.logger.Printf("Snapshot to install: {appliedIndex: %v, \nkvMap: %v, \nlock manager: %+v,\nclerksAppliedIndex: %+v}\n",
+		appliedIndex, kvMap, lockManager, clerksAppliedIndex)
 	kv.logger.Printf("Installing snapshot. Current state: %s\n", kv.reportState())
 
 	kv.appliedIndex = appliedIndex
 	kv.kvMap = kvMap
 	kv.lockManager = lockManager
-	for clerkID, appliedIndex := range clerksAppliedIndexGet {
+	for clerkID, appliedIndex := range clerksAppliedIndex {
 		clerk := kv.getClerk(clerkID)
-		clerk.appliedIndexGet = appliedIndex
-	}
-	for clerkID, appliedIndex := range clerksAppliedIndexPut {
-		clerk := kv.getClerk(clerkID)
-		clerk.appliedIndexPut = appliedIndex
+		clerk.appliedIndex = appliedIndex
 	}
 }
 
@@ -452,14 +435,11 @@ func (kv *KVServer) encodeState() []byte {
 	e.Encode(kv.kvMap)
 	e.Encode(kv.lockManager)
 	// encode every clerk's applided index
-	clerkInfosGet := make(map[int64]int)
-	clerkInfosPut := make(map[int64]int)
+	clerksInfo := make(map[int64]int)
 	for clerkID, clerk := range kv.clerks {
-		clerkInfosGet[clerkID] = clerk.appliedIndexGet
-		clerkInfosPut[clerkID] = clerk.appliedIndexPut
+		clerksInfo[clerkID] = clerk.appliedIndex
 	}
-	e.Encode(clerkInfosGet)
-	e.Encode(clerkInfosPut)
+	e.Encode(clerksInfo)
 	return w.Bytes()
 }
 
@@ -476,8 +456,8 @@ func (kv *KVServer) reportState() string {
 func (kv *KVServer) reportClerks() string {
 	var clerksInfo string = "["
 	for clerkID, clerk := range kv.clerks {
-		clerksInfo += fmt.Sprintf("{clerkID: %v, appliedIndexGet: %v, appliedIndexPut: %v}, ",
-			clerkID, clerk.appliedIndexGet, clerk.appliedIndexPut)
+		clerksInfo += fmt.Sprintf("{clerkID: %v, appliedIndex: %v}, ",
+			clerkID, clerk.appliedIndex)
 	}
 	clerksInfo += "]"
 	return clerksInfo
