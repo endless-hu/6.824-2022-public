@@ -20,26 +20,41 @@ jobs:
           path: my_repo
       
       - name: Checkout This Repository
-        # Get the test script from this public repository.
         uses: actions/checkout@v3
         with:
           path: this_repo
 
       - name: "Run Frangipani Tests"
-        # plugin my private source code into the original repository
         run: |
-          git clone git://g.csail.mit.edu/6.824-golabs-2022 6.824
-          cd 6.824/src
-          cp $GITHUB_WORKSPACE/this_repo/scripts/go.mod .
-          cd raft
-          cp $GITHUB_WORKSPACE/my_repo/src/raft/raft.go .
-          cd ../
-          cp -r $GITHUB_WORKSPACE/this_repo/frangipani .
-          cd frangipani
-          cp $GITHUB_WORKSPACE/this_repo/scripts/test-many.sh ./test-many.sh
-          bash test-many.sh Test 30
-
-          echo "---------------------------"
-          echo "Run Speed Test"
-          sed '98d' client.go -i
+          cd my_repo/src/frangipani
+          ls
+          for i in {1..30}; do 
+            if ! go test -timeout 10m; then
+              echo "Some tests fail!" && exit 1
+            fi
+          echo "============== Round $i Done ================"
+          done
+          echo
+          echo "--------------------------------------------"
+          echo "    Run Speed Test With Full Performance"
+          sed '97d' client.go -i
           go test -run Speed
+
+      - name: Copy frangipani Out
+        run: |
+          cd $GITHUB_WORKSPACE/this_repo/frangipani
+          ls
+          cp $GITHUB_WORKSPACE/my_repo/src/frangipani/client.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/frangipani/common.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/frangipani/config.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/frangipani/lock_manager.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/frangipani/server.go .
+          cp $GITHUB_WORKSPACE/my_repo/src/frangipani/test_test.go .
+
+      - name: Update /frangipani
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Zhijing Hu
+          author_email: qq906555703@gmail.com
+          cwd: ./this_repo/
+          message: "Update /frangipani"
