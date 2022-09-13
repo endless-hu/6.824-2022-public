@@ -1,3 +1,29 @@
+commit 91346d2b2b9330bfdafd961d17e5e923e52b60a5
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Sep 13 13:34:23 2022 +0800
+
+    Frangipani: Bug fix.
+    When applying commands, server should skip smaller CommandIndex,
+    instead of reporting a fatal error.
+
+commit 639f4ad5833bfd902bb60e1744fb48c19d057f33
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Sep 13 09:45:50 2022 +0800
+
+    Frangipani: Cancel SeqNo for client `Get`.
+
+commit 79c9129a635ae495007e38234be3b008d32fdc8e
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Tue Sep 13 09:12:15 2022 +0800
+
+    Add GitHub Action yml for frangipani.
+
+commit 8ce8f15bb0236fe3791d098b3428da3f3492c3b2
+Author: Zhijing Hu <qq906555703@gmail.com>
+Date:   Mon Sep 12 10:33:47 2022 +0800
+
+    Raft: Make all `Fatal` statements to print to stdout.
+
 commit 6168eb28ae2bdb7945ce1973894892c7847f9006
 Author: Zhijing Hu <qq906555703@gmail.com>
 Date:   Sun Sep 11 15:53:32 2022 +0800
