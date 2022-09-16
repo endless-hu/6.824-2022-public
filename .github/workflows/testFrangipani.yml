@@ -32,13 +32,15 @@ jobs:
             if ! go test -timeout 10m; then
               echo "Some tests fail!" && exit 1
             fi
-          echo "============== Round $i Done ================"
+            echo "============== Round $i Done ================"
           done
           echo
           echo "--------------------------------------------"
           echo "    Run Speed Test With Full Performance"
           sed '97d' client.go -i
           go test -run Speed
+
+          git --no-pager log > $GITHUB_WORKSPACE/this_repo/src_commit_log.txt
 
       - name: Copy frangipani Out
         run: |
@@ -51,10 +53,10 @@ jobs:
           cp $GITHUB_WORKSPACE/my_repo/src/frangipani/server.go .
           cp $GITHUB_WORKSPACE/my_repo/src/frangipani/test_test.go .
 
-      - name: Update /frangipani
+      - name: Auto Update
         uses: EndBug/add-and-commit@v9
         with:
           author_name: Zhijing Hu
           author_email: qq906555703@gmail.com
           cwd: ./this_repo/
-          message: "Update /frangipani"
+          message: "Auto Update"
