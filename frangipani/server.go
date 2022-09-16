@@ -310,7 +310,6 @@ func (kv *KVServer) applier() {
 			} else if msg.SnapshotValid {
 				kv.installSnapshot(msg.Snapshot)
 			}
-			kv.takeSnapshot()
 			kv.mu.Unlock()
 		}
 	}
@@ -381,14 +380,15 @@ func (kv *KVServer) broadcastNoLeader() {
 // -----------------------------------------------------------------
 
 // Only take snapshot when Raft's log is big enough
-// Called with kv.mu locked
 func (kv *KVServer) takeSnapshot() {
 	if kv.maxraftstate == -1 {
 		return
 	}
+	kv.mu.Lock()
+	defer kv.mu.Unlock()
 	if kv.persister.RaftStateSize() >= kv.maxraftstate {
-		kv.rf.Snapshot(kv.appliedIndex, kv.encodeState())
 		kv.logger.Printf("Taking snapshot... Current state: %s\n", kv.reportState())
+		kv.rf.Snapshot(kv.appliedIndex, kv.encodeState())
 	}
 }
 
@@ -410,12 +410,12 @@ func (kv *KVServer) installSnapshot(data []byte) {
 		log.Fatalln("Failed to read persistent state")
 	}
 
-	if appliedIndex <= kv.appliedIndex {
-		kv.logger.Println("Snapshot is older than current state")
-		return
-	}
 	kv.logger.Printf("Snapshot to install: {appliedIndex: %v, \nkvMap: %v, \nlock manager: %+v,\nclerksAppliedIndex: %+v}\n",
 		appliedIndex, kvMap, lockManager, clerksAppliedIndex)
+	if appliedIndex <= kv.appliedIndex {
+		kv.logger.Println("Snapshot is older than current state. My state:", kv.reportState())
+		return
+	}
 	kv.logger.Printf("Installing snapshot. Current state: %s\n", kv.reportState())
 
 	kv.appliedIndex = appliedIndex
@@ -468,7 +468,8 @@ func (kv *KVServer) reportClerks() string {
 // Background go routine to monitor leader state changes
 func (kv *KVServer) leadershipMonitor() {
 	for !kv.killed() {
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
+		kv.takeSnapshot()
 		// Don't check if I'm not the leader
 		if atomic.LoadInt32(&kv.isLeader) == 0 {
 			continue
