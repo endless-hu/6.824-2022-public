@@ -304,6 +304,7 @@ func (kv *KVServer) applier() {
 				if msg.CommandIndex <= kv.appliedIndex {
 					kv.logger.Printf("[APPLIER] Current Index: %v, msg.Index: %v. Skip!\n",
 						kv.appliedIndex, msg.CommandIndex)
+					kv.mu.Unlock()
 					continue
 				}
 				kv.applyCmd(msg)

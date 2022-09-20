@@ -1,13 +1,6 @@
-commit 95a5ba44642b70d5a5f66c9a190eb3f8aa284fde
+commit a5aa14aff07422a73b49f0d963a4c6799ae0a27d
 Author: Zhijing Hu <qq906555703@gmail.com>
-Date:   Fri Sep 16 12:17:34 2022 +0800
+Date:   Sun Sep 18 18:12:15 2022 +0800
 
-    Update Frangipani & Raft:
-    1. For `frangipani/server.go`, I changed some snapshot-related
-       logging to log important debugging info.
-    2. For `raft.go`, I modified `(*rf).Snapshot()` to make the func
-       atomic. Previously I released the lock before `persister` saves
-       the state and snapshot to allow more concurrency, but it was
-       problematic when the leader wanted to send `InstallSnapshot`
-       while taking snapshot for itself, which caused the follower to
-       receive a new header with an old snapshot.
+    Frangipani: Fix a bug in `applier()`. I forgot to release the lock
+    when skipping a command.
